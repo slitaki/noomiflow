@@ -70,6 +70,4 @@ import { SequenceNode } from "./sequencenode";
         }
         this.targetSeqs.push(seqId);
     }
-
-
 }
