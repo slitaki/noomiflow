@@ -1,6 +1,6 @@
 import { Expression } from "../expression";
-import { EGateType, ENodeType } from "../types";
-import { FlowNode } from "./flownode";
+import { ENodeType } from "../types";
+import { FlowNode } from "./basenode";
 
 /**
  * 顺序流
@@ -31,7 +31,7 @@ export class SequenceNode extends FlowNode{
     constructor(id:string,targetRef?:string,sourceRef?:string,expr?:string){
         super();
         this.id = id;
-        this.node = ENodeType.GATE;
+        this.nodeType = ENodeType.GATE;
         this.targetRef = targetRef;
         this.sourceRef = sourceRef;
         this.condition = new Expression(expr.trim());

@@ -1,6 +1,5 @@
-import { FlowNode } from "./flownode";
+import { FlowNode } from "./basenode";
 import { EGateType, ENodeType } from "../types";
-import { SequenceNode } from "./sequencenode";
 
 /**
  * 网关
@@ -37,7 +36,7 @@ import { SequenceNode } from "./sequencenode";
         this.id = id;
         this.type = type;
         this.default = defaultId;
-        this.node = ENodeType.GATE;
+        this.nodeType = ENodeType.GATE;
     }
 
     /**

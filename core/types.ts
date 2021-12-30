@@ -43,3 +43,50 @@ export enum EGateType{
      */
     INCLUSIVE='inclusive'
 }
+
+/**
+ * 事件类型
+ */
+export enum EEventType{
+    /**
+     * 开始事件
+     */
+    START='start',
+    /**
+     * 结束事件
+     */
+    END='end',
+    /**
+     * 终止事件
+     */
+    TERMINATE='terminate'
+}
+
+/**
+ * 任务类型
+ */
+export enum ETaskType{
+    /**
+     * 用户任务
+     */
+    USER = 'user',
+    /**
+     * 手工任务
+     */
+    MANUAL = 'manual'
+}
+
+/**
+ * 任务指派类型
+ */
+export enum EAssignType{
+    /**
+     * 指派到组
+     */
+    GROUP = 'group',
+
+    /**
+     * 指派到人
+     */
+    USER = 'user'
+}

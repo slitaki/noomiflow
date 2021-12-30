@@ -1,13 +1,19 @@
 import { ENodeType } from "../types";
 
 /**
- * 工作流节点
+ * 工作流基础节点
  */
- export class FlowNode{
+export class FlowNode{
+    /**
+     * 所属流程id
+     */
+    flowId:number; 
+    
     /**
      * 节点类型
      */
-    node:ENodeType;
+    nodeType:ENodeType;
+
     /**
      * 节点id（流程内唯一）
      */
@@ -17,7 +23,7 @@ import { ENodeType } from "../types";
      * 节点执行
      * @param model     传递的数据模型，可为空 
      */
-    public run(model?:any){
+    public run(model?:any):void{
         
     }
 }
