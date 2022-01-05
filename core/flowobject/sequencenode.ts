@@ -1,6 +1,6 @@
 import { Expression } from "../expression";
 import { ENodeType } from "../types";
-import { FlowNode } from "./basenode";
+import { FlowNode } from "../node/basenode";
 
 /**
  * 顺序流
@@ -9,12 +9,12 @@ export class SequenceNode extends FlowNode{
     /**
      * 目标节点id
      */
-    targetRef:string;
+    target:string;
 
     /**
      * 来源节点id
      */
-    sourceRef:string;
+    source:string;
 
     /**
      * 顺序流条件
@@ -23,17 +23,17 @@ export class SequenceNode extends FlowNode{
 
     /**
      * 构造器
-     * @param id            节点id
-     * @param targetRef     目标节点id
-     * @param sourceRef     来源节点id
-     * @param expr          表达式串
+     * @param id        节点id
+     * @param target    目标节点id
+     * @param source    来源节点id
+     * @param expr      表达式串
      */
-    constructor(id:string,targetRef?:string,sourceRef?:string,expr?:string){
+    constructor(id:string,target?:string,source?:string,expr?:string){
         super();
         this.id = id;
         this.nodeType = ENodeType.GATE;
-        this.targetRef = targetRef;
-        this.sourceRef = sourceRef;
+        this.target = target;
+        this.source = source;
         this.condition = new Expression(expr.trim());
     }
 }

@@ -15,14 +15,4 @@ export class TaskNode extends FlowNode{
      * 资源id
      */
     resourceId:string;
-
-    /**
-     * 候选人（表达式或用户名或组名）
-     */
-    candidate:Expression|string;
-
-    /**
-     * 指派类型
-     */
-    assignType:EAssignType;
 }
