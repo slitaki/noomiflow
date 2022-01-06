@@ -1,6 +1,6 @@
-import { Expression } from "../expression";
-import { EAssignType, ETaskType } from "../types";
-import { FlowNode } from "./basenode";
+import { Expression } from "../../expression";
+import { EAssignType, ETaskType } from "../../types";
+import { FlowNode } from "../basenode";
 
 /**
  * 任务

@@ -1,5 +1,5 @@
-import { FlowNode } from "./basenode";
-import { EGateType, ENodeType } from "../types";
+import { FlowNode } from "../basenode";
+import { EGateType, ENodeType } from "../../types";
 
 /**
  * 网关

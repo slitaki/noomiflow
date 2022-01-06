@@ -1,4 +1,4 @@
-import { TaskNode } from "../tasknode";
+import { TaskNode } from "./tasknode";
 /**
  * service任务
  */

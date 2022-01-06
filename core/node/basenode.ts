@@ -5,6 +5,16 @@ import { ENodeType } from "../types";
  */
 export class FlowNode{
     /**
+     * 节点id（流程内唯一）
+     */
+    id:string;
+
+    /**
+     * 节点名（可选）
+     */
+    name?:string;
+
+    /**
      * 所属流程id
      */
     flowId:number; 
@@ -13,11 +23,6 @@ export class FlowNode{
      * 节点类型
      */
     nodeType:ENodeType;
-
-    /**
-     * 节点id（流程内唯一）
-     */
-    id:string;
 
     /**
      * 节点执行

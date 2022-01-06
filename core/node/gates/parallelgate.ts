@@ -1,4 +1,4 @@
-import { GateNode } from "../gatenode";
+import { GateNode } from "./gatenode";
 
 /**
  * 并行网关类

@@ -1,6 +1,6 @@
 import { Expression } from "../../expression";
 import { EAssignType } from "../../types";
-import { TaskNode } from "../tasknode";
+import { TaskNode } from "./tasknode";
 /**
  * 人机交互任务
  */
@@ -15,5 +15,5 @@ export class UserTask extends TaskNode{
       */
     assignType:EAssignType;
 
-    
+
 }
