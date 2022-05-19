@@ -1,4 +1,5 @@
-import { EventNode } from "../connectingobject/eventnode";
+import { EventNode } from "./eventnode";
+
 /**
  * end event类
  */

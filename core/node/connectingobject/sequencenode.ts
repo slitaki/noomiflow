@@ -28,9 +28,8 @@ export class SequenceNode extends FlowNode{
      * @param sourceRef     来源节点id
      * @param expr          表达式串
      */
-    constructor(id:string,targetRef?:string,sourceRef?:string,expr?:string){
-        super();
-        this.id = id;
+    constructor(id:string,name:string,targetRef?:string,sourceRef?:string,expr?:string){
+        super(id,name);
         this.nodeType = ENodeType.GATE;
         this.targetRef = targetRef;
         this.sourceRef = sourceRef;

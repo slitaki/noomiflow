@@ -15,7 +15,7 @@ export class ProcessNode extends FlowNode{
      * @param id            节点id
      */
      constructor(id:string){
-        super();
+        super(id);
         this.id = id;
         this.nodeType = ENodeType.PROCESS;
     }

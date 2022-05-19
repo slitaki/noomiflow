@@ -25,6 +25,15 @@ export class FlowNode{
     nodeType:ENodeType;
 
     /**
+     * 构造器
+     * @param id    节点id
+     * @param name  节点名
+     */
+    constructor(id:string,name?:string){
+        this.id = id;
+        this.name = name;
+    }
+    /**
      * 节点执行
      * @param model     传递的数据模型，可为空 
      */

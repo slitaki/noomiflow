@@ -14,6 +14,4 @@ export class UserTask extends TaskNode{
       * 指派类型
       */
     assignType:EAssignType;
-
-
 }

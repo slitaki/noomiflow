@@ -77,10 +77,10 @@ export class Expression {
      * @param model 	数据对象
      * @returns 		计算结果
      */
-    public val(model: Object) {
+    public val(param: Object) {
         let v;
         try {
-            v = this.execFunc.apply(null,[model]);
+            v = this.execFunc.apply(null,[param]);
         } catch (e) {
             // console.error(e);
         }

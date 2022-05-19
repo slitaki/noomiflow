@@ -32,8 +32,7 @@ import { EGateType, ENodeType } from "../../types";
      * @param defaultId     默认顺序流id
      */
     constructor(id:string,type?:EGateType,defaultId?:string){
-        super();
-        this.id = id;
+        super(id);
         this.type = type;
         this.default = defaultId;
         this.nodeType = ENodeType.GATE;
