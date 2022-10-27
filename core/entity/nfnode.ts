@@ -1,0 +1,135 @@
+import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,OneToMany,EntityProxy} from 'relaen';
+import {NfProcess} from './nfprocess';
+import {NfResource} from './nfresource';
+
+@Entity('NF_NODE')
+export class NfNode extends BaseEntity{
+	@Id()
+	@Column({
+		name:'NODE_ID',
+		type:'int',
+		nullable:false
+	})
+	public nodeId:number;
+
+	@ManyToOne({entity:'NfProcess'})
+	@JoinColumn({
+		name:'PROCESS_ID',
+		refName:'PROCESS_ID',
+		nullable:true
+	})
+	public nfProcess:NfProcess;
+
+	@Column({
+		name:'NODE_NAME',
+		type:'string',
+		nullable:true,
+		length:255
+	})
+	public nodeName:string;
+
+	@Column({
+		name:'DEF_NAME',
+		type:'string',
+		nullable:true,
+		length:255
+	})
+	public defName:string;
+
+	@Column({
+		name:'START_TIME',
+		type:'int',
+		nullable:true
+	})
+	public startTime:number;
+
+	@Column({
+		name:'END_TIME',
+		type:'int',
+		nullable:true
+	})
+	public endTime:number;
+
+	@Column({
+		name:'WAIT_TIME',
+		type:'int',
+		nullable:true
+	})
+	public waitTime:number;
+
+	@Column({
+		name:'VARIABLES',
+		type:'string',
+		nullable:true
+	})
+	public variables:string;
+
+	@Column({
+		name:'ASSIGNEE',
+		type:'int',
+		nullable:true
+	})
+	public assignee:number;
+
+	@Column({
+		name:'USER_ID',
+		type:'int',
+		nullable:true
+	})
+	public userId:number;
+
+	@Column({
+		name:'CANDIDATE_USERS',
+		type:'string',
+		nullable:true,
+		length:2048
+	})
+	public candidateUsers:string;
+
+	@Column({
+		name:'CANDIDATE_GROUPS',
+		type:'string',
+		nullable:true,
+		length:2048
+	})
+	public candidateGroups:string;
+
+	@Column({
+		name:'IS_AGREE',
+		type:'int',
+		nullable:true
+	})
+	public isAgree:number;
+
+	@Column({
+		name:'REASON',
+		type:'string',
+		nullable:true,
+		length:1024
+	})
+	public reason:string;
+
+	@Column({
+		name:'VER',
+		type:'int',
+		nullable:true
+	})
+	public ver:number;
+
+	@OneToMany({
+		entity:'NfResource',
+		mappedBy:'nfNode'
+	})
+	public nfResources:Array<NfResource>;
+
+	constructor(idValue?:number){
+		super();
+		this.nodeId = idValue;
+	}
+	public async getNfProcess():Promise<NfProcess>{
+		return this['nfProcess']?this['nfProcess']:await EntityProxy.get(this,'nfProcess');
+	}
+	public async getNfResources():Promise<Array<NfResource>>{
+		return this['nfResources']?this['nfResources']:await EntityProxy.get(this,'nfResources');
+	}
+}

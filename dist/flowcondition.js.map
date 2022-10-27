@@ -1,0 +1,1 @@
+{"version":3,"file":"flowcondition.js","sourceRoot":"","sources":["../core/flowcondition.ts"],"names":[],"mappings":";;;AACA,uCAAqC;AAErC;;GAEG;AACH,MAAa,aAAa;IAWtB;;;OAGG;IACI,IAAI;QACP,IAAI,KAAK,GAAG,kBAAQ,CAAC,kBAAkB,CAAC,IAAI,CAAC,SAAS,CAAC,CAAC;QACxD,OAAO,IAAI,CAAC,UAAU,CAAC,GAAG,CAAC,KAAK,CAAC,CAAC;IACtC,CAAC;CACJ;AAnBD,sCAmBC"}

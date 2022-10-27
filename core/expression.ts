@@ -1,17 +1,29 @@
 /**
  * 表达式类
  */
-export class Expression {
+export class NExpression {
     /**
      * 执行函数
      */
     execFunc: Function;
 
     /**
-     * @param module    模块
+     * 只包含自有model变量
+     */
+    allModelField: boolean;
+
+    /**
+     * 值
+     */
+    value:any;
+
+    /**
      * @param exprStr	表达式串
      */
     constructor(exprStr: string) {
+        if (!exprStr) {
+            return;
+        }
         const funStr = this.compile(exprStr);
         this.execFunc = new Function('$model',`return ` + funStr);
     }
@@ -42,22 +54,27 @@ export class Expression {
                 }else if(lch === '(' || lch === ')'){ //函数，非内部函数
                     retS += handleFunc(s);
                 }else { //字段 this $model .field等不做处理
-                    if(s.startsWith('this.') || s==='$model' || s.startsWith('$model.') || (s[0] === '.' && s[1]!=='.')){ //非model属性
+                    if(s.startsWith('this.') || s==='$model' || s.startsWith('$model.') || this.isKeyWord(s) || (s[0] === '.' && s[1]!=='.')){ //非model属性
                         retS += s; 
                     }else{  //model属性
                         let s1 = '';
                         if(s.startsWith('...')){ // ...属性名
                             s1 = '...';
-                            s = s.substr(3);
+                            s = s.substring(3);
                         }
                         retS += s1 +'$model.' + s;
+                        
+                        //存在‘.’，则变量不全在在当前模型中
+                        if(s.indexOf('.') !== -1){
+                            this.allModelField = false;
+                        }
                     }
                 }
             } 
             index = reg.lastIndex;
         }
         if(index < exprStr.length){
-            retS += exprStr.substr(index);
+            retS += exprStr.substring(index);
         }
         
         return retS;
@@ -68,22 +85,109 @@ export class Expression {
          * @returns     处理后的串
          */
         function handleFunc(str):string{
-            return '$model.' + str;
+            let ind = str.indexOf('.');
+                    
+            //中间无'.'
+            if(ind === -1){
+                let ind1 = str.lastIndexOf('(');
+                let fn = str.substring(0,ind1);
+                //末尾字符
+                if(!this.isKeyWord(fn)){
+                    let lch = str[str.length-1];
+                    if(lch !== ')'){ //有参数
+                        return 'this.invokeMethod("' + fn + '",';
+                    }else{ //无参数
+                        return 'this.invokeMethod("' + fn + '")';
+                    }
+                }
+            }else if(str[0] !== '.'){  //第一个为点不处理
+                let fn = str.substring(0,ind);
+                if(!this.isKeyWord(fn)){ //首字段非关键词，则为属性
+                    return '$model.' + str;
+                }
+            }
+            return str;
         }
     }
 
     /**
      * 表达式计算
-     * @param model 	数据对象
+     * @param model 	模型
      * @returns 		计算结果
      */
-    public val(param: Object) {
+    public val(model) {
         let v;
         try {
-            v = this.execFunc.apply(null,[param]);
+            v = this.execFunc.apply(null,[model]);
         } catch (e) {
             // console.error(e);
         }
+        this.value = v;
         return v;
+    }
+
+    private isKeyWord(key:string):boolean{
+        return [
+            'arguments',
+            'boolean',
+            'break',
+            'byte',
+            'catch',
+            'char',
+            'const',
+            'default',
+            'delete',
+            'do',
+            'double',
+            'else',
+            'enum',
+            'eval',
+            'false',
+            'float',
+            'for',
+            'function',
+            'goto',
+            'if',
+            'in',
+            'instanceof',
+            'int',
+            'let',
+            'long',
+            'new',
+            'null',
+            'return',
+            'short',
+            'switch',
+            'this',
+            'throw',
+            'true',
+            'try',
+            'this',
+            'throw',
+            'typeof',
+            'var',
+            'while',
+            'with',
+            'Array',
+            'Date',
+            'JSON',
+            'Set',
+            'Map',
+            'eval',
+            'function',
+            'Infinity',
+            'isFinite',
+            'isNaN',
+            'isPrototypeOf',
+            'Math',
+            'NaN',
+            'Number',
+            'Object',
+            'prototype',
+            'String',
+            'isPrototypeOf',
+            'undefined',
+            'valueOf'
+        ].includes(key);
     }
 }

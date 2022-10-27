@@ -1,92 +1,45 @@
-import { FlowCondition } from "./flowcondition";
 
 /**
- * 工作流节点枚举类型
+ * 节点类型
  */
 export enum ENodeType{
-    /**
-     * 事件
-     */
-    EVENT = 'event',
-    /**
-     * 子流程
-     */
-    PROCESS = 'process',
-
-    /**
-     * 顺序流
-     */
-    SEQUENCE = 'sequence',
-
-    /**
-     * 网关
-     */
-    GATE = 'gate'
+    SEQUENCE = 'sequence',      //顺序流
+    START = 'start',            //开始事件
+    END = 'end',                //结束事件
+    EXCLUSIVE = 'exclusive',    //排他网关
+    PARALLEL = 'parallel',      //并行网关 
+    INCLUSIVE = 'inclusive',    //包容网关
+    USERTASK = 'usertask'       //用户任务
 }
 
-/**
- * 网关节点类型
- */
-export enum EGateType{
+export interface INode{
     /**
-     * 唯一网关
+     * 节点名，全流程唯一
      */
-    EXCLUSIVE='exclusive',
+    name:string;
 
     /**
-     * 并行网关
+     * 类型
      */
-    PARALLEL='parallel',
+    type:ENodeType;
 
     /**
-     * 包含网关
+     * 条件，对sequence有效
      */
-    INCLUSIVE='inclusive'
-}
-
-/**
- * 事件类型
- */
-export enum EEventType{
-    /**
-     * 开始事件
-     */
-    START='start',
-    /**
-     * 结束事件
-     */
-    END='end',
-    /**
-     * 终止事件
-     */
-    TERMINATE='terminate'
-}
-
-/**
- * 任务类型
- */
-export enum ETaskType{
-    /**
-     * 用户任务
-     */
-    USER = 'user',
-    /**
-     * 手工任务
-     */
-    MANUAL = 'manual'
-}
-
-/**
- * 任务指派类型
- */
-export enum EAssignType{
-    /**
-     * 指派到组
-     */
-    GROUP = 'group',
+    cond?:string;
 
     /**
-     * 指派到人
+     * 页面路径，对人工任务有效
      */
-    USER = 'user'
+    pagePath?:string;
+
+    /**
+     * 来源节点，对sequence有效
+     */
+    src?:string;
+
+    /**
+     * 目标节点，对sequence有效
+     */
+     dst?:string;
 }
