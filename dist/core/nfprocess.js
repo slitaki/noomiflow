@@ -11,6 +11,7 @@ const nparallelnode_1 = require("./node/nparallelnode");
 const nusertasknode_1 = require("./node/nusertasknode");
 const ntasknode_1 = require("./node/ntasknode");
 const nfnode_1 = require("./entity/nfnode");
+const nmodulenode_1 = require("./node/nmodulenode");
 /**
  * 流程类
  */
@@ -39,11 +40,14 @@ class NFProcess {
                 case types_1.ENodeType.END:
                     node = new nendnode_1.NEndNode(n, this);
                     break;
+                case types_1.ENodeType.SEQUENCE:
+                    node = new nsequencenode_1.NSequenceNode(n, this);
+                    break;
                 case types_1.ENodeType.USERTASK:
                     node = new nusertasknode_1.NUserTaskNode(n, this);
                     break;
-                case types_1.ENodeType.SEQUENCE:
-                    node = new nsequencenode_1.NSequenceNode(n, this);
+                case types_1.ENodeType.MODULETASK:
+                    node = new nmodulenode_1.NModuleNode(n, this);
                     break;
                 case types_1.ENodeType.EXCLUSIVE:
                     node = new nexclusivenode_1.NExclusiveNode(n, this);
@@ -105,6 +109,9 @@ class NFProcess {
      */
     async start() {
         const node = this.nodes.find(item => item instanceof nstartnode_1.NStartNode);
+        //修改开始时间
+        this.instance.startTime = new Date().getTime();
+        await this.instance.save();
         if (!node) {
             throw "流程无开始节点";
         }
@@ -116,15 +123,16 @@ class NFProcess {
     async end() {
         delete this.currentNode;
         this.instance.endTime = new Date().getTime();
+        this.instance.handleTime = this.instance.endTime - this.instance.startTime;
         await this.instance.save();
     }
     /**
      * 获取节点
-     * @param name  节点名称
+     * @param id    节点id
      * @returns     节点
      */
-    getNode(name) {
-        return this.nodes.find(item => item.name === name);
+    getNode(id) {
+        return this.nodes.find(item => item.id === id);
     }
     /**
      * 设置当前节点
@@ -135,7 +143,7 @@ class NFProcess {
         //设置当前变量
         if (node instanceof ntasknode_1.NTaskNode) {
             //更换流程实例当前节点名
-            this.instance.nodeName = node.name;
+            this.instance.currentId = node.id;
             await this.instance.save();
             if (node.nfNode && node.nfNode.variables) {
                 this.params = JSON.stringify(node.nfNode.variables);
@@ -148,44 +156,46 @@ class NFProcess {
      * @returns
      */
     async next(cfg) {
-        //当前任务名
-        let cName;
-        if (this.currentNode && this.currentNode instanceof ntasknode_1.NTaskNode) {
-            await this.currentNode.finish(cfg);
-            cName = this.currentNode.name;
+        //当前任务id
+        let nid;
+        if (this.currentNode) {
+            nid = this.currentNode.id;
+            if (this.currentNode instanceof ntasknode_1.NTaskNode) {
+                await this.currentNode.finish(cfg);
+            }
         }
         else {
-            const node = this.getNode(this.instance.nodeName);
+            const node = this.getNode(this.instance.currentId);
             await node.finish(cfg);
-            cName = this.instance.nodeName;
+            nid = this.instance.currentId;
         }
         //执行下个流程节点
-        let seq = this.getSequenceNode(cName);
+        let seq = this.getSequenceNode(nid);
         if (seq) {
             await seq.run();
         }
     }
     /**
      * 获取顺序流节点
-     * @param name      src 或 dst节点名
+     * @param id        src 或 dst节点id
      * @param isDst     如果name为dst，则该项为true
      */
-    getSequenceNode(name, isDst) {
+    getSequenceNode(id, isDst) {
         if (isDst) {
-            return this.nodes.find(item => item['dst'] === name);
+            return this.nodes.find(item => item['dst'] === id);
         }
-        return this.nodes.find(item => item['src'] === name);
+        return this.nodes.find(item => item['src'] === id);
     }
     /**
      * 获取顺序流节点集合，主要用于网关
-     * @param name      src 或 dst节点名
+     * @param id        src 或 dst节点id
      * @param isDst     如果name为dst，则该项为true
      */
-    getSequenceNodes(name, isDst) {
+    getSequenceNodes(id, isDst) {
         if (isDst) {
-            return this.nodes.filter(item => item['dst'] === name);
+            return this.nodes.filter(item => item['dst'] === id);
         }
-        return this.nodes.filter(item => item['src'] === name);
+        return this.nodes.filter(item => item['src'] === id);
     }
     /**
      * 获取所有任务节点及资源

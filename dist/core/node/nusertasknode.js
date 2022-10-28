@@ -21,7 +21,7 @@ class NUserTaskNode extends ntasknode_1.NTaskNode {
         const em = await relaen_1.getEntityManager();
         const query = em.createQuery(nfnode_1.NfNode.name);
         let node = await query.select("*")
-            .where({ "nfProcess": this.process.instance.processId, nodeName: this.name })
+            .where({ "nfProcess": this.process.instance.processId, defId: this.id })
             .orderBy({ nodeId: "desc" })
             .getResult();
         //回滚则使用之前参数，否则使用现有变量
@@ -29,6 +29,7 @@ class NUserTaskNode extends ntasknode_1.NTaskNode {
         node = new nfnode_1.NfNode();
         node.nfProcess = this.process.instance;
         node.startTime = new Date().getTime();
+        node.defId = this.id;
         node.nodeName = this.name;
         //设置指派人
         node.assignee = this.process.instance.userId;

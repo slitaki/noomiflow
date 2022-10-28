@@ -11,7 +11,12 @@ export class NNode{
     process:NFProcess;
 
     /**
-     * 节点名
+     * 节点id，流程内唯一
+     */
+    id:string;
+
+    /**
+     * 节点名，用于显示
      */
     name:string;
 
@@ -22,6 +27,7 @@ export class NNode{
 
     constructor(cfg:INode,process:NFProcess){
         this.name = cfg.name;
+        this.id = cfg.id;
         this.process = process;
     }
 

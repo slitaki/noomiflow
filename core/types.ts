@@ -9,12 +9,17 @@ export enum ENodeType{
     EXCLUSIVE = 'exclusive',    //排他网关
     PARALLEL = 'parallel',      //并行网关 
     INCLUSIVE = 'inclusive',    //包容网关
-    USERTASK = 'usertask'       //用户任务
+    USERTASK = 'usertask',      //用户任务
+    MODULETASK = 'moduletask'   //模块任务   
 }
 
 export interface INode{
     /**
-     * 节点名，全流程唯一
+     * 节点id，全流程唯一
+     */
+    id:string;
+    /**
+     * 节点名，全流程唯一(用于显示)
      */
     name:string;
 

@@ -1,5 +1,5 @@
 {
-  "name": "tsflow",
+  "name": "noomiflow",
   "version": "0.0.1",
   "description": "nooflow是noomi团队开发的流程引擎",
   "main": "index.js",
@@ -14,7 +14,6 @@
   "author": "yanglei(fieldyang@163.com)",
   "license": "MIT",
   "dependencies": {
-    "log4j": "^1.0.0",
     "log4js": "^6.7.0",
     "relaen": "^0.3.1-final"
   }

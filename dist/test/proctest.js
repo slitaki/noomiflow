@@ -10,35 +10,35 @@ async function defineProcess() {
     await nfengine_1.NFEngine.defineProcess(json);
 }
 async function createProcess() {
-    await nfengine_1.NFEngine.createProcess('测试流程1', '测试流程1-管理员提交', 1);
+    await nfengine_1.NFEngine.createProcess('测试流程2', '测试流程2-管理员提交-20221010', 1);
 }
 (async function () {
     relaen_1.RelaenManager.init(relaenconfig_1.RelaenConfig);
     // await defineProcess();
     // await createProcess();
-    // const proc = await NFEngine.getInstance(5,1);
-    // console.log(proc)
+    //获取流程实例
+    // const proc = await NFEngine.getInstance(8,1);
     // proc.start();
     // 取用户的未处理流程
     // const nodes = await NFEngine.getUserProcess(1,0);
     // console.log(nodes);
     // 执行节点，根据参数直接end
-    // const proc = await NFEngine.getInstance(nodes[0].nfProcess.processId,1);
+    // const proc = await NFEngine.getInstance(nodes[2].nfProcess.processId,1);
     // proc.setParam('data',1);
     // await proc.next();
     //根据参数跳转到task2
-    // const proc = await NFEngine.getInstance(nodes[0].nfProcess.processId,1);
+    // const proc = await NFEngine.getInstance(nodes[2].nfProcess.processId,1);
     // proc.setParam('data',2);
     // await proc.next();
     //task2审核不通过
-    // const nodes = await NFEngine.getUserProcess(2,0);
-    // const proc = await NFEngine.getInstance(nodes[0].nfProcess.processId,2);
-    // proc.setParam('agree',0);
-    // await proc.next({userId:2,agree:0,reason:'资料不齐'});
-    //task2 审核通过，结束
     const nodes = await nfengine_1.NFEngine.getUserProcess(2, 0);
     const proc = await nfengine_1.NFEngine.getInstance(nodes[0].nfProcess.processId, 2);
-    proc.setParam('agree', 1);
-    await proc.next({ userId: 2, agree: 1, reason: '审核通过' });
+    proc.setParam('agree', 0);
+    await proc.next({ userId: 2, agree: 0, reason: '资料不齐' });
+    //task2 审核通过，结束
+    // const nodes = await NFEngine.getUserProcess(2,0);
+    // const proc = await NFEngine.getInstance(nodes[0].nfProcess.processId,2);
+    // proc.setParam('agree',1);
+    // await proc.next({userId:2,agree:1,reason:'审核通过'});
 })();
 //# sourceMappingURL=proctest.js.map

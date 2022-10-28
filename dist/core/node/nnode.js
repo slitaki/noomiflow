@@ -8,6 +8,7 @@ const types_1 = require("../types");
 class NNode {
     constructor(cfg, process) {
         this.name = cfg.name;
+        this.id = cfg.id;
         this.process = process;
     }
     /**

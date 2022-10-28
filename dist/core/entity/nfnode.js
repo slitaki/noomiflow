@@ -53,13 +53,13 @@ __decorate([
 ], NfNode.prototype, "nodeName", void 0);
 __decorate([
     relaen_1.Column({
-        name: 'DEF_NAME',
+        name: 'DEF_ID',
         type: 'string',
         nullable: true,
         length: 255
     }),
     __metadata("design:type", String)
-], NfNode.prototype, "defName", void 0);
+], NfNode.prototype, "defId", void 0);
 __decorate([
     relaen_1.Column({
         name: 'START_TIME',

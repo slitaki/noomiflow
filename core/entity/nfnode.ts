@@ -29,12 +29,12 @@ export class NfNode extends BaseEntity{
 	public nodeName:string;
 
 	@Column({
-		name:'DEF_NAME',
+		name:'DEF_ID',
 		type:'string',
 		nullable:true,
 		length:255
 	})
-	public defName:string;
+	public defId:string;
 
 	@Column({
 		name:'START_TIME',

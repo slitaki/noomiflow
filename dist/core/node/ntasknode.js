@@ -21,7 +21,7 @@ class NTaskNode extends nnode_1.NNode {
         const em = await relaen_1.getEntityManager();
         const query = em.createQuery(nfnode_1.NfNode.name);
         const node = await query.select("*")
-            .where({ "nfProcess": this.process.instance.processId, nodeName: this.name })
+            .where({ "nfProcess": this.process.instance.processId, defId: this.id })
             .orderBy({ nodeId: "desc" })
             .getResult();
         if (node) {

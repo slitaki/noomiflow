@@ -86,12 +86,12 @@ export class NfProcess extends BaseEntity{
 	public dueTime:number;
 
 	@Column({
-		name:'NODE_NAME',
+		name:'CURRENT_ID',
 		type:'string',
 		nullable:true,
 		length:255
 	})
-	public nodeName:string;
+	public currentId:string;
 
 	@Column({
 		name:'VARIABLES',

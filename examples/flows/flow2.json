@@ -1,0 +1,33 @@
+{
+    "name":"模块流程",
+    "nodes":
+    [
+        {
+            "type":"start",
+            "id":"start"
+        },{
+            "type":"sequence",
+            "src":"start",
+            "dst":"task1"
+        },{
+            "type":"usertask",
+            "id":"task1",
+            "name":"提交审核"
+        },{
+            "type":"sequence",
+            "src":"task1",
+            "dst":"sumtask"
+        },{
+            "type":"moduletask",
+            "id":"sumtask",
+            "path":"./examples/module/handleparam.js"
+        },{
+            "type":"sequence",
+            "src":"sumtask",
+            "dst":"end"
+        },{
+            "type":"end",
+            "id":"end"
+        }
+    ]
+}

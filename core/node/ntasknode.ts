@@ -27,7 +27,7 @@ export class NTaskNode extends NNode{
         const em:EntityManager = await getEntityManager();
         const query:Query = em.createQuery(NfNode.name);
         const node = <NfNode>await query.select("*")
-            .where({"nfProcess":this.process.instance.processId,nodeName:this.name})
+            .where({"nfProcess":this.process.instance.processId,defId:this.id})
             .orderBy({nodeId:"desc"})
             .getResult();
         if(node){

@@ -118,13 +118,13 @@ __decorate([
 ], NfProcess.prototype, "dueTime", void 0);
 __decorate([
     relaen_1.Column({
-        name: 'NODE_NAME',
+        name: 'CURRENT_ID',
         type: 'string',
         nullable: true,
         length: 255
     }),
     __metadata("design:type", String)
-], NfProcess.prototype, "nodeName", void 0);
+], NfProcess.prototype, "currentId", void 0);
 __decorate([
     relaen_1.Column({
         name: 'VARIABLES',

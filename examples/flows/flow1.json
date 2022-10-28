@@ -1,24 +1,25 @@
 {
-    "name":"测试流程1",
+    "name":"人工审核流程",
     "nodes":
     [
         {
             "type":"start",
-            "name":"start"
+            "id":"start"
         },{
             "type":"sequence",
             "src":"start",
             "dst":"task1"
         },{
             "type":"usertask",
-            "name":"task1"
+            "id":"task1",
+            "name":"提交审核"
         },{
             "type":"sequence",
             "src":"task1",
             "dst":"exgate1"
         },{
             "type":"exclusive",
-            "name":"exgate1"
+            "id":"exgate1"
         },{
             "type":"sequence",
             "src":"exgate1",
@@ -31,7 +32,8 @@
             "cond":"data==2"
         },{
             "type":"usertask",
-            "name":"task2",
+            "id":"task2",
+            "name":"审核",
             "candidateUsers":"yang"
         },{
             "type":"sequence",
@@ -39,7 +41,7 @@
             "dst":"exgate2"
         },{
             "type":"exclusive",
-            "name":"exgate2"
+            "id":"exgate2"
         },{
             "type":"sequence",
             "src":"exgate2",
@@ -52,7 +54,7 @@
             "cond":"agree==1"
         },{
             "type":"end",
-            "name":"end"
+            "id":"end"
         }
     ]
 }

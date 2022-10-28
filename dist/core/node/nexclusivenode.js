@@ -16,7 +16,7 @@ class NExclusiveNode extends nnode_1.NNode {
         }
     }
     init() {
-        this.outSequences = this.process.getSequenceNodes(this.name);
+        this.outSequences = this.process.getSequenceNodes(this.id);
         if (!this.outSequences || this.outSequences.length === 0) {
             throw `节点'${this.name}'配置错误!`;
         }

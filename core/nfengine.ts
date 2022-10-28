@@ -45,8 +45,6 @@ export class NFEngine{
         const process = new NFProcess(cfg);
         //保存流程实例
         process.instance = await this.saveInstance(defP,instName,userId);
-        //设置流程当前id
-        process.userId = userId;
         //返回流程对象
         return process;
     }
@@ -91,6 +89,7 @@ export class NFEngine{
         let proc:NfProcess = new NfProcess();
         proc.createTime = new Date().getTime();
         proc.processName = name;
+        proc.userId = userId;
         if(defProc.dueTime){
             proc.dueTime = proc.createTime + defProc.dueTime;
         }
@@ -113,7 +112,8 @@ export class NFEngine{
         }else if(status === 1){
             param['endTime'] = {rel:'is',value:'not null'};
         }
-        let nodes = <NfNode[]>await NfNode.findMany({candidateUsers:{rel:'like',value:userId+','}});
+
+        let nodes = <NfNode[]>await NfNode.findMany(param);
         for(let n of nodes){
             await n.getNfProcess();
             await n.getNfResources();

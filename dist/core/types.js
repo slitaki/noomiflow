@@ -12,6 +12,7 @@ var ENodeType;
     ENodeType["EXCLUSIVE"] = "exclusive";
     ENodeType["PARALLEL"] = "parallel";
     ENodeType["INCLUSIVE"] = "inclusive";
-    ENodeType["USERTASK"] = "usertask"; //用户任务
+    ENodeType["USERTASK"] = "usertask";
+    ENodeType["MODULETASK"] = "moduletask"; //模块任务   
 })(ENodeType = exports.ENodeType || (exports.ENodeType = {}));
 //# sourceMappingURL=types.js.map

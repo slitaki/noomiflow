@@ -19,8 +19,8 @@ class NInclusiveNode extends nnode_1.NNode {
         }
     }
     init() {
-        this.outSequences = this.process.getSequenceNodes(this.name);
-        this.inSequences = this.process.getSequenceNodes(this.name, true);
+        this.outSequences = this.process.getSequenceNodes(this.id);
+        this.inSequences = this.process.getSequenceNodes(this.id, true);
         if (!this.outSequences || this.outSequences.length === 0 || !this.inSequences || this.inSequences.length === 0) {
             throw `节点'${this.name}'配置错误!`;
         }
