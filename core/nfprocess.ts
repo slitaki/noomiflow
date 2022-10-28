@@ -133,6 +133,12 @@ export class NFProcess{
      */
     async start(){
         const node = this.nodes.find(item=>item instanceof NStartNode);
+        if(this.instance.endTime){
+            throw "流程已结束";
+        }
+        if(this.instance.deleteTime){
+            throw "流程已关闭";
+        }
         //修改开始时间
         this.instance.startTime = new Date().getTime();
         await this.instance.save();

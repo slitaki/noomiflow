@@ -31,4 +31,29 @@ export declare class NFUserManager {
      * @param groupNames
      */
     static getUserIdsByUserNames(userNames: string): Promise<NfUser[]>;
+    /**
+     * 获取用户待处理流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static getUnHandleNodes(userId: number, pageNo?: number, pageSize?: number): Promise<any>;
+    /**
+     * 获取用户处理的所有流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static getHandledNodes(userId: number, pageNo?: number, pageSize?: number): Promise<any>;
+    /**
+     * 获取流程
+     * @param param     参数对象
+     * @param pageNo    页号
+     * @param pageSize  页面大小
+     */
+    private static getNodes;
+    /**
+     * 获取用户发起的流程
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static getCreatedProcess(userId: number, pageNo?: number, pageSize?: number): Promise<any>;
 }

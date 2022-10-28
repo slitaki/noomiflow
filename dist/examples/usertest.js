@@ -17,5 +17,11 @@ async function addUser() {
     // await addUser();
     console.log(await nfusermanager_1.NFUserManager.getUserIdsByGroupNames('manager,datacheck'));
     console.log(await nfusermanager_1.NFUserManager.getUserIdsByUserNames('yang'));
+    // 获取用户未处理流程节点
+    console.log(await nfusermanager_1.NFUserManager.getUnHandleNodes(2, 1, 1));
+    // 获取用户处理的流程节点
+    console.log(await nfusermanager_1.NFUserManager.getHandledNodes(2, 1, 1));
+    //获取用户创建的流程
+    console.log(await nfusermanager_1.NFUserManager.getCreatedProcess(1, 1, 1));
 })();
 //# sourceMappingURL=usertest.js.map

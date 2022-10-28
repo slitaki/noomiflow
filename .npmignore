@@ -1,0 +1,6 @@
+sql/
+examples/
+node_modules/
+.vscode/
+tsconfig.json/
+.npmignore

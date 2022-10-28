@@ -1,6 +1,5 @@
 import { NfDefProcess } from "./entity/nfdefprocess";
 import { NfProcess } from "./entity/nfprocess";
-import { NfNode } from "./entity/nfnode";
 import { NFProcess } from "./nfprocess";
 /**
  * 流程引擎
@@ -24,6 +23,12 @@ export declare class NFEngine {
      */
     static createProcess(defName: string, instName: string, userId?: number): Promise<NFProcess>;
     /**
+     * 关闭流程
+     * @param processId     流程id
+     * @param reason        关闭理由
+     */
+    static closeProcess(processId: number, reason?: string): Promise<boolean>;
+    /**
      * 获取流程实例
      */
     static getInstance(procId: number, userId: number): Promise<NFProcess>;
@@ -34,10 +39,4 @@ export declare class NFEngine {
      * @param userId    用户id
      */
     static saveInstance(defProc: NfDefProcess, name: string, userId: number): Promise<NfProcess>;
-    /**
-     * 获取用户处理流程
-     * @param userId    用户id
-     * @param status    状态 0:未处理  1已处理  2全部
-     */
-    static getUserProcess(userId: number, status?: number): Promise<NfNode[]>;
 }

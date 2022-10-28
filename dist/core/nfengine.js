@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.NFEngine = void 0;
 const nfdefprocess_1 = require("./entity/nfdefprocess");
 const nfprocess_1 = require("./entity/nfprocess");
-const nfnode_1 = require("./entity/nfnode");
 const nfprocess_2 = require("./nfprocess");
 /**
  * 流程引擎
@@ -45,6 +44,21 @@ class NFEngine {
         process.instance = await this.saveInstance(defP, instName, userId);
         //返回流程对象
         return process;
+    }
+    /**
+     * 关闭流程
+     * @param processId     流程id
+     * @param reason        关闭理由
+     */
+    static async closeProcess(processId, reason) {
+        const proc = await nfprocess_1.NfProcess.find(processId);
+        if (!proc) {
+            return;
+        }
+        proc.deleteReason = reason;
+        proc.deleteTime = new Date().getTime();
+        await proc.save();
+        return true;
     }
     /**
      * 获取流程实例
@@ -90,28 +104,6 @@ class NFEngine {
         proc.nfDefProcess = defProc;
         proc = await proc.save();
         return proc;
-    }
-    /**
-     * 获取用户处理流程
-     * @param userId    用户id
-     * @param status    状态 0:未处理  1已处理  2全部
-     */
-    static async getUserProcess(userId, status) {
-        const param = {
-            candidateUsers: { rel: 'like', value: ',' + userId + ',' }
-        };
-        if (status === 0) {
-            param['endTime'] = null;
-        }
-        else if (status === 1) {
-            param['endTime'] = { rel: 'is', value: 'not null' };
-        }
-        let nodes = await nfnode_1.NfNode.findMany(param);
-        for (let n of nodes) {
-            await n.getNfProcess();
-            await n.getNfResources();
-        }
-        return nodes;
     }
 }
 exports.NFEngine = NFEngine;

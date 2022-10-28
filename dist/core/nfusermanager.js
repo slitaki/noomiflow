@@ -4,6 +4,8 @@ exports.NFUserManager = void 0;
 const relaen_1 = require("relaen");
 const nfgroup_1 = require("./entity/nfgroup");
 const nfgroupuser_1 = require("./entity/nfgroupuser");
+const nfnode_1 = require("./entity/nfnode");
+const nfprocess_1 = require("./entity/nfprocess");
 const nfuser_1 = require("./entity/nfuser");
 class NFUserManager {
     /**
@@ -89,6 +91,68 @@ class NFUserManager {
             users.push(r.userId);
         }
         return users;
+    }
+    /**
+     * 获取用户待处理流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static async getUnHandleNodes(userId, pageNo, pageSize) {
+        return await this.getNodes({
+            candidateUsers: { rel: 'like', value: ',' + userId + ',' },
+            endTime: null
+        }, pageNo, pageSize);
+    }
+    /**
+     * 获取用户处理的所有流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static async getHandledNodes(userId, pageNo, pageSize) {
+        return await this.getNodes({
+            userId: userId
+        }, pageNo, pageSize);
+    }
+    /**
+     * 获取流程
+     * @param param     参数对象
+     * @param pageNo    页号
+     * @param pageSize  页面大小
+     */
+    static async getNodes(param, pageNo, pageSize) {
+        const em = await relaen_1.getEntityManager();
+        const query = em.createQuery(nfnode_1.NfNode.name);
+        let start = 0;
+        if (pageNo > 0 && pageSize > 0) {
+            start = (pageNo - 1) * pageSize;
+        }
+        const nodes = await query.select(['*', 'nfProcess.*']).where(param).getResultList(start, pageSize);
+        const total = await em.getCount(nfnode_1.NfNode.name, param);
+        for (let n of nodes) {
+            await n.getNfResources();
+        }
+        await em.close();
+        return { total: total, rows: nodes };
+    }
+    /**
+     * 获取用户发起的流程
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    static async getCreatedProcess(userId, pageNo, pageSize) {
+        const em = await relaen_1.getEntityManager();
+        const query = em.createQuery(nfprocess_1.NfProcess.name);
+        const param = {
+            userId: userId
+        };
+        let start = 0;
+        if (pageNo > 0 && pageSize > 0) {
+            start = (pageNo - 1) * pageSize;
+        }
+        const nodes = await query.select(['*']).where(param).getResultList(start, pageSize);
+        const total = await em.getCount(nfprocess_1.NfProcess.name, param);
+        await em.close();
+        return { total: total, rows: nodes };
     }
 }
 exports.NFUserManager = NFUserManager;

@@ -1,6 +1,8 @@
 import { EntityManager, getEntityManager, Query } from "relaen";
 import { NfGroup } from "./entity/nfgroup";
 import { NfGroupUser } from "./entity/nfgroupuser";
+import { NfNode } from "./entity/nfnode";
+import { NfProcess } from "./entity/nfprocess";
 import { NfUser } from "./entity/nfuser";
 
 
@@ -92,5 +94,71 @@ export class NFUserManager{
             users.push(r.userId);
         }
         return users;
+    }
+
+    /**
+     * 获取用户待处理流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    public static async getUnHandleNodes(userId:number,pageNo?:number,pageSize?:number):Promise<any>{
+        return await this.getNodes({
+            candidateUsers:{rel:'like',value:','+userId+','},
+            endTime:null
+        },pageNo,pageSize)
+    }
+
+    /**
+     * 获取用户处理的所有流程节点
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+     public static async getHandledNodes(userId:number,pageNo?:number,pageSize?:number):Promise<any>{
+        return await this.getNodes({
+            userId:userId
+        },pageNo,pageSize)
+    }
+
+    /**
+     * 获取流程
+     * @param param     参数对象
+     * @param pageNo    页号
+     * @param pageSize  页面大小
+     */
+    private static async getNodes(param:any,pageNo?:number,pageSize?:number){
+        const em:EntityManager = await getEntityManager();
+        const query:Query = em.createQuery(NfNode.name);
+        let start = 0;
+        if(pageNo>0 && pageSize>0){
+            start = (pageNo-1) * pageSize;
+        }
+        const nodes = <NfNode[]> await query.select(['*','nfProcess.*']).where(param).getResultList(start,pageSize);
+        const total = await em.getCount(NfNode.name,param);
+        for(let n of nodes){
+            await n.getNfResources();
+        }
+        await em.close();
+        return {total:total,rows:nodes}
+    }
+
+    /**
+     * 获取用户发起的流程
+     * @param userId    用户id
+     * @returns         {total:流程数,rows:节点数组}
+     */
+    public static async getCreatedProcess(userId:number,pageNo?:number,pageSize?:number):Promise<any>{
+        const em:EntityManager = await getEntityManager();
+        const query:Query = em.createQuery(NfProcess.name);
+        const param = {
+            userId:userId
+        }
+        let start = 0;
+        if(pageNo>0 && pageSize>0){
+            start = (pageNo-1) * pageSize;
+        }
+        const nodes = <NfProcess[]> await query.select(['*']).where(param).getResultList(start,pageSize);
+        const total = await em.getCount(NfProcess.name,param);
+        await em.close();
+        return {total:total,rows:nodes}
     }
 }

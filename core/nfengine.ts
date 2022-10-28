@@ -50,6 +50,22 @@ export class NFEngine{
     }
 
     /**
+     * 关闭流程
+     * @param processId     流程id
+     * @param reason        关闭理由
+     */
+    static async closeProcess(processId:number,reason?:string){
+        const proc = <NfProcess>await NfProcess.find(processId);
+        if(!proc){
+            return;
+        }
+        proc.deleteReason = reason;
+        proc.deleteTime = new Date().getTime();
+        await proc.save();
+        return true;
+    }
+
+    /**
      * 获取流程实例
      */
     static async getInstance(procId:number,userId:number):Promise<NFProcess>{
@@ -96,28 +112,5 @@ export class NFEngine{
         proc.nfDefProcess = defProc;
         proc = <NfProcess>await proc.save();
         return proc;
-    }
-
-    /**
-     * 获取用户处理流程
-     * @param userId    用户id
-     * @param status    状态 0:未处理  1已处理  2全部
-     */
-    public static async getUserProcess(userId:number,status?:number):Promise<NfNode[]>{
-        const param = {
-            candidateUsers:{rel:'like',value:','+userId+','}
-        }
-        if(status === 0){
-            param['endTime'] = null;
-        }else if(status === 1){
-            param['endTime'] = {rel:'is',value:'not null'};
-        }
-
-        let nodes = <NfNode[]>await NfNode.findMany(param);
-        for(let n of nodes){
-            await n.getNfProcess();
-            await n.getNfResources();
-        }
-        return nodes;
     }
 }

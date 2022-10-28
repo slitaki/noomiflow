@@ -22,4 +22,10 @@ async function addUser(){
     // await addUser();
     console.log(await NFUserManager.getUserIdsByGroupNames('manager,datacheck'));
     console.log(await NFUserManager.getUserIdsByUserNames('yang'))
+    // 获取用户未处理流程节点
+    console.log(await NFUserManager.getUnHandleNodes(2,1,1));
+    // 获取用户处理的流程节点
+    console.log(await NFUserManager.getHandledNodes(2,1,1));
+    //获取用户创建的流程
+    console.log(await NFUserManager.getCreatedProcess(1,1,1));
 })()
