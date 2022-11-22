@@ -2,7 +2,7 @@ import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,OneToMany,EntityProxy} 
 import {NfProcess} from './nfprocess';
 import {NfResource} from './nfresource';
 
-@Entity('NF_NODE')
+@Entity('nf_node')
 export class NfNode extends BaseEntity{
 	@Id()
 	@Column({
@@ -58,25 +58,11 @@ export class NfNode extends BaseEntity{
 	public waitTime:number;
 
 	@Column({
-		name:'VARIABLES',
-		type:'string',
-		nullable:true
-	})
-	public variables:string;
-
-	@Column({
 		name:'ASSIGNEE',
 		type:'int',
 		nullable:true
 	})
 	public assignee:number;
-
-	@Column({
-		name:'USER_ID',
-		type:'int',
-		nullable:true
-	})
-	public userId:number;
 
 	@Column({
 		name:'CANDIDATE_USERS',
@@ -95,6 +81,28 @@ export class NfNode extends BaseEntity{
 	public candidateGroups:string;
 
 	@Column({
+		name:'VER',
+		type:'int',
+		nullable:true
+	})
+	public ver:number;
+
+	@Column({
+		name:'VARIABLES',
+		type:'string',
+		nullable:true,
+		length:255
+	})
+	public variables:string;
+
+	@Column({
+		name:'USER_ID',
+		type:'int',
+		nullable:true
+	})
+	public userId:number;
+
+	@Column({
 		name:'IS_AGREE',
 		type:'int',
 		nullable:true
@@ -108,13 +116,6 @@ export class NfNode extends BaseEntity{
 		length:1024
 	})
 	public reason:string;
-
-	@Column({
-		name:'VER',
-		type:'int',
-		nullable:true
-	})
-	public ver:number;
 
 	@OneToMany({
 		entity:'NfResource',

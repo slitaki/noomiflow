@@ -3,42 +3,42 @@ import { NFProcess } from "../nfprocess";
 import { NNode } from "./nnode";
 import { NParallelNode } from "./nparallelnode";
 
-export class NSequenceNode extends NNode{
+export class NSequenceNode extends NNode {
     /**
      * 表达式处理器
      */
-    expr:NExpression;
+    expr: NExpression;
 
     /**
      * 源节点
      */
-    src:string;
+    src: string;
 
     /**
      * 目标节点
      */
-    dst:string;
+    dst: string;
 
-    constructor(cfg,process:NFProcess){
-        super(cfg,process);
+    constructor(cfg, process: NFProcess) {
+        super(cfg, process);
         this.src = cfg.src;
         this.dst = cfg.dst;
-        if(cfg.cond){
+        if (cfg.cond) {
             this.expr = new NExpression(cfg.cond);
         }
     }
-    
-    async run():Promise<any>{
+
+    async run(): Promise<any> {
         const node = this.process.getNode(this.dst);
-        if(!node){
+        if (!node) {
             throw '目标节点不存在';
         }
         //并行网关，不执行条件
-        if(node instanceof NParallelNode){
+        if (node instanceof NParallelNode) {
             await node.run();
-        }else if(!this.expr || this.expr.val(this.process.getParam())){
+        } else if (!this.expr || this.expr.val(this.process.getParam())) {
             await node.run();
-        }else{
+        } else {
             return false;
         }
         return true;

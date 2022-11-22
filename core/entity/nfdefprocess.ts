@@ -1,7 +1,7 @@
 import {BaseEntity,Entity,Column,Id,OneToMany,EntityProxy} from 'relaen';
 import {NfProcess} from './nfprocess';
 
-@Entity('NF_DEF_PROCESS')
+@Entity('nf_def_process')
 export class NfDefProcess extends BaseEntity{
 	@Id()
 	@Column({
@@ -25,7 +25,7 @@ export class NfDefProcess extends BaseEntity{
 		nullable:true,
 		length:256
 	})
-	public kEYWORDS:string;
+	public keywords:string;
 
 	@Column({
 		name:'DEF_TYPE',
@@ -70,6 +70,13 @@ export class NfDefProcess extends BaseEntity{
 		nullable:true
 	})
 	public ver:number;
+
+	@Column({
+		name:'IS_SUSPEND',
+		type:'int',
+		nullable:true
+	})
+	public isSuspend:number;
 
 	@OneToMany({
 		entity:'NfProcess',

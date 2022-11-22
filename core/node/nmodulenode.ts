@@ -13,24 +13,24 @@ import { NNode } from "./nnode";
  *    
  * }
  */
-export class NModuleNode extends NNode{
+export class NModuleNode extends NNode {
     /**
      * 模块路径
      */
-    modulePath:string;
+    modulePath: string;
 
-    constructor(cfg,process){
-        super(cfg,process);
+    constructor(cfg, process) {
+        super(cfg, process);
         this.modulePath = cfg.path;
     }
 
     async run() {
         await super.run();
-        try{
+        try {
             const parser = await import(this.modulePath);
             await parser(this.process);
-            this.process.next();
-        }catch(e){
+            await this.process.next();
+        } catch (e) {
             console.error(e);
         }
     }

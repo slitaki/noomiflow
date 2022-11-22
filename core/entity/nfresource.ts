@@ -1,7 +1,7 @@
 import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,EntityProxy} from 'relaen';
 import {NfNode} from './nfnode';
 
-@Entity('NF_RESOURCE')
+@Entity('nf_resource')
 export class NfResource extends BaseEntity{
 	@Id()
 	@Column({

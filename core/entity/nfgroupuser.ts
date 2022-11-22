@@ -2,7 +2,7 @@ import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,EntityProxy} from 'rela
 import {NfUser} from './nfuser';
 import {NfGroup} from './nfgroup';
 
-@Entity('NF_GROUP_USER')
+@Entity('nf_group_user')
 export class NfGroupUser extends BaseEntity{
 	@Id()
 	@Column({

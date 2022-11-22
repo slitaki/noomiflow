@@ -1,7 +1,7 @@
 import {BaseEntity,Entity,Column,Id,OneToMany,EntityProxy} from 'relaen';
 import {NfGroupUser} from './nfgroupuser';
 
-@Entity('NF_USER')
+@Entity('nf_user')
 export class NfUser extends BaseEntity{
 	@Id()
 	@Column({
@@ -33,7 +33,7 @@ export class NfUser extends BaseEntity{
 		nullable:true,
 		length:32
 	})
-	public eMAIL:string;
+	public email:string;
 
 	@Column({
 		name:'USER_PWD',
@@ -48,7 +48,7 @@ export class NfUser extends BaseEntity{
 		type:'int',
 		nullable:true
 	})
-	public eNABLED:number;
+	public enabled:number;
 
 	@Column({
 		name:'VER',

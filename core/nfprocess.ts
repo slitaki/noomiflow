@@ -14,7 +14,7 @@ import { NModuleNode } from "./node/nmodulenode";
 /**
  * 流程类
  */
-export class NFProcess{
+export class NFProcess {
     /**
      * 流程节点集合
      */
@@ -23,24 +23,24 @@ export class NFProcess{
     /**
      * 当前任务节点
      */
-    private currentNode:NNode;
+    private currentNode: NNode;
 
     /**
      * 流程参数
      */
-    private params:any = {};
+    private params: any = {};
 
     /**
      * 流程实体
      */
-    public instance:NfProcess;
+    public instance: NfProcess;
 
     /**
      * 当前用户id
      */
-    public userId:number;
-    
-    constructor(cfg,inst?:NfProcess){
+    public userId: number;
+
+    constructor(cfg, inst?: NfProcess) {
         this.handleNodes(cfg);
         this.instance = inst;
     }
@@ -50,34 +50,34 @@ export class NFProcess{
      * @param nodes 
      * @returns 
      */
-    handleNodes(nodes:INode[]){
+    handleNodes(nodes: INode[]) {
         const rNodes = [];
-        for(let n of nodes){
+        for (let n of nodes) {
             let node;
-            switch(n.type){
+            switch (n.type) {
                 case ENodeType.START:
-                    node = new NStartNode(n,this);
+                    node = new NStartNode(n, this);
                     break;
                 case ENodeType.END:
-                    node = new NEndNode(n,this);
+                    node = new NEndNode(n, this);
                     break;
                 case ENodeType.SEQUENCE:
-                    node = new NSequenceNode(n,this);
+                    node = new NSequenceNode(n, this);
                     break;
                 case ENodeType.USERTASK:
-                    node = new NUserTaskNode(n,this);
+                    node = new NUserTaskNode(n, this);
                     break;
                 case ENodeType.MODULETASK:
-                    node = new NModuleNode(n,this);
+                    node = new NModuleNode(n, this);
                     break;
                 case ENodeType.EXCLUSIVE:
-                    node = new NExclusiveNode(n,this);
+                    node = new NExclusiveNode(n, this);
                     break;
                 case ENodeType.INCLUSIVE:
-                    node = new NInclusiveNode(n,this);
+                    node = new NInclusiveNode(n, this);
                     break;
                 case ENodeType.PARALLEL:
-                    node = new NParallelNode(n,this);
+                    node = new NParallelNode(n, this);
                     break;
             }
             rNodes.push(node);
@@ -90,11 +90,11 @@ export class NFProcess{
     /**
      * 对有init方法的节点执行init
      */
-    doNodeInit(){
-        for(let node of this.nodes){
-            if(node['init']){
+    doNodeInit() {
+        for (let node of this.nodes) {
+            if (node['init']) {
                 node['init'].apply(node);
-            }   
+            }
         }
     }
 
@@ -102,25 +102,25 @@ export class NFProcess{
      * 获取参数
      * @param key   参数名，如果没有则表示整个参数对象
      */
-    getParam(key?:string){
-        if(!this.params){
+    getParam(key?: string) {
+        if (!this.params) {
             return;
         }
-        if(key){
+        if (key) {
             return this.params[key];
         }
         return this.params;
     }
 
     /**
-     * 保存参数
+     * 设置流程变量
      * @param key       key
      * @param value     值
      */
-    setParam(key:string,value:any){
-        if(key){
+    setVariablesParam(key: string, value: any) {
+        if (key) {
             this.params[key] = value;
-        }else{
+        } else {
             this.params = value;
         }
         //更改参数保存到流程实例中
@@ -131,18 +131,21 @@ export class NFProcess{
     /**
      * 开始流传
      */
-    async start(){
-        const node = this.nodes.find(item=>item instanceof NStartNode);
-        if(this.instance.endTime){
+    async start() {
+        const node = this.nodes.find(item => item instanceof NStartNode);
+        if (this.instance.startTime) {
+            throw "流程已开始";
+        }
+        if (this.instance.endTime) {
             throw "流程已结束";
         }
-        if(this.instance.deleteTime){
+        if (this.instance.deleteTime) {
             throw "流程已关闭";
         }
         //修改开始时间
         this.instance.startTime = new Date().getTime();
         await this.instance.save();
-        if(!node){
+        if (!node) {
             throw "流程无开始节点";
         }
         await node.run();
@@ -151,7 +154,7 @@ export class NFProcess{
     /**
      * 结束
      */
-    async end(){
+    async end() {
         delete this.currentNode;
         this.instance.endTime = new Date().getTime();
         this.instance.handleTime = this.instance.endTime - this.instance.startTime;
@@ -163,22 +166,22 @@ export class NFProcess{
      * @param id    节点id 
      * @returns     节点
      */
-    getNode(id:string):NNode{
-        return this.nodes.find(item=>item.id === id);
+    getNode(id: string): NNode {
+        return this.nodes.find(item => item.id === id);
     }
 
     /**
      * 设置当前节点
      * @param node 
      */
-    async setCurrentNode(node:NNode){
+    async setCurrentNode(node: NNode) {
         this.currentNode = node;
         //设置当前变量
-        if(node instanceof NTaskNode){
+        if (node instanceof NTaskNode) {
             //更换流程实例当前节点名
             this.instance.currentId = node.id;
             await this.instance.save();
-            if(node.nfNode && node.nfNode.variables){
+            if (node.nfNode && node.nfNode.variables) {
                 this.params = JSON.stringify(node.nfNode.variables);
             }
         }
@@ -189,22 +192,22 @@ export class NFProcess{
      * @param cfg       配置
      * @returns 
      */
-    async next(cfg?:object){
+    async next(cfg?: object) {
         //当前任务id
         let nid;
-        if(this.currentNode){
+        if (this.currentNode) {
             nid = this.currentNode.id;
-            if(this.currentNode instanceof NTaskNode){
+            if (this.currentNode instanceof NTaskNode) {
                 await this.currentNode.finish(cfg);
-            } 
-        }else{
+            }
+        } else {
             const node = <NTaskNode>this.getNode(this.instance.currentId);
             await node.finish(cfg);
             nid = this.instance.currentId;
         }
         //执行下个流程节点
         let seq = this.getSequenceNode(nid);
-        if(seq){
+        if (seq) {
             await seq.run();
         }
     }
@@ -214,11 +217,11 @@ export class NFProcess{
      * @param id        src 或 dst节点id
      * @param isDst     如果name为dst，则该项为true
      */
-    getSequenceNode(id:string,isDst?:boolean):NSequenceNode{
-        if(isDst){
-            return <NSequenceNode>this.nodes.find(item=>item['dst'] === id);
+    getSequenceNode(id: string, isDst?: boolean): NSequenceNode {
+        if (isDst) {
+            return <NSequenceNode>this.nodes.find(item => item['dst'] === id);
         }
-        return <NSequenceNode>this.nodes.find(item=>item['src'] === id);
+        return <NSequenceNode>this.nodes.find(item => item['src'] === id);
     }
 
     /**
@@ -226,11 +229,11 @@ export class NFProcess{
      * @param id        src 或 dst节点id
      * @param isDst     如果name为dst，则该项为true
      */
-    getSequenceNodes(id:string,isDst?:boolean):NSequenceNode[]{
-        if(isDst){
-            return <NSequenceNode[]>this.nodes.filter(item=>item['dst'] === id);
+    getSequenceNodes(id: string, isDst?: boolean): NSequenceNode[] {
+        if (isDst) {
+            return <NSequenceNode[]>this.nodes.filter(item => item['dst'] === id);
         }
-        return <NSequenceNode[]>this.nodes.filter(item=>item['src'] === id);
+        return <NSequenceNode[]>this.nodes.filter(item => item['src'] === id);
     }
 
     /**
@@ -238,15 +241,23 @@ export class NFProcess{
      * @param procId    流程id
      * @returns         节点集合
      */
-    async getAllNodes(procId:number){
+    async getAllNodes(procId: number) {
         //从数据库获取
-        const nodes:NfNode[] = <NfNode[]>await NfNode.findMany({nfProcess:procId});
+        const nodes: NfNode[] = <NfNode[]>await NfNode.findMany({ nfProcess: procId });
         //获取资源
-        for(let n of nodes){
+        for (let n of nodes) {
             await n.getNfResources();
         }
         return nodes;
     }
 
-    
+
+    //创建子流程
+    async createChildProcess() {
+
+    }
+
+    public getId(): number {
+        return this.instance.processId;
+    }
 }

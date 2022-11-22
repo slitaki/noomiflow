@@ -4,39 +4,39 @@ import { NSequenceNode } from "./nsequencenode";
 import { NFProcess } from "../nfprocess";
 
 /**
- * 并行网关
+ * 包容网关
  */
-export class NInclusiveNode extends NNode{
-    outSequences:NSequenceNode[];
-    inSequences:NSequenceNode[];    
+export class NInclusiveNode extends NNode {
+    outSequences: NSequenceNode[];
+    inSequences: NSequenceNode[];
     /**
      * 出口顺序流
      */
-    sequences:NSequenceNode[];
+    sequences: NSequenceNode[];
 
     /**
      * 执行剩余数量
      */
-    inCount:number;
+    inCount: number;
 
-    constructor(cfg:INode,process:NFProcess){
-        super(cfg,process);
+    constructor(cfg: INode, process: NFProcess) {
+        super(cfg, process);
     }
-    
+
     async run() {
         await super.run();
-        //执行一次，则计数器-1，到0时，表示网关可以进行下一步
-        if(--this.inCount === 0){
-            for(let node of this.outSequences){
+        //执行一次，则计数器-1，到0时，表示网关可以进行下一步 todo 如果配置了表达式，应执行所有结果为true的表达式
+        if (--this.inCount === 0) {
+            for (let node of this.outSequences) {
                 await node.run();
             }
         }
     }
 
-    init(){
+    init() {
         this.outSequences = this.process.getSequenceNodes(this.id);
-        this.inSequences = this.process.getSequenceNodes(this.id,true);
-        if(!this.outSequences || this.outSequences.length === 0 || !this.inSequences || this.inSequences.length === 0){
+        this.inSequences = this.process.getSequenceNodes(this.id, true);
+        if (!this.outSequences || this.outSequences.length === 0 || !this.inSequences || this.inSequences.length === 0) {
             throw `节点'${this.name}'配置错误!`;
         }
         this.inCount = this.inSequences.length;
