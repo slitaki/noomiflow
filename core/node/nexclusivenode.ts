@@ -17,7 +17,7 @@ export class NExclusiveNode extends NNode {
     }
 
     async run() {
-        await super.run();
+        // await super.run();
         //第一个满足则结束
         for (let node of this.outSequences) {
             if (await node.run()) {

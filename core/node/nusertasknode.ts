@@ -33,10 +33,11 @@ export class NUserTaskNode extends NTaskNode {
         //设置指派人
         //默认为流程创始人
         if (this.process.instance.userId) {
-            node.assignee = this.process.instance.userId;
-            node.userId = this.process.instance.userId
+            node.assignee = this.process.instance.userId
         }
         let arr;
+
+        //
         if (this['candidateUsers']) {
             arr = await NFUserManager.getUserIdsByUserNames(this['candidateUsers']);
         } else if (this['candidateGroups']) {

@@ -27,7 +27,7 @@ export class NParallelNode extends NNode {
     }
 
     async run() {
-        await super.run();
+        // await super.run();
         //执行一次，则计数器-1，到0时，表示网关可以进行下一步 
         if (--this.inCount === 0) {
             for (let node of this.outSequences) {

@@ -5,7 +5,7 @@ import { INode } from "../types";
 import { NNode } from "./nnode";
 
 /**
- * 人工任务
+ * 任务
  */
 export class NTaskNode extends NNode {
     /**

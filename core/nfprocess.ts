@@ -11,6 +11,7 @@ import { NUserTaskNode } from "./node/nusertasknode";
 import { NTaskNode } from "./node/ntasknode";
 import { NfNode } from "./entity/nfnode";
 import { NModuleNode } from "./node/nmodulenode";
+import { NFTask } from "./nftask";
 /**
  * 流程类
  */
@@ -24,7 +25,10 @@ export class NFProcess {
      * 当前任务节点
      */
     private currentNode: NNode;
-
+    /**
+     * 当前任务节点 并行网关等 流程会有多个任务节点
+     */
+    private currentNodeMap: Map<any, NFTask> = new Map();
     /**
      * 流程参数
      */
@@ -102,7 +106,7 @@ export class NFProcess {
      * 获取参数
      * @param key   参数名，如果没有则表示整个参数对象
      */
-    getParam(key?: string) {
+    async getParam(key?: string) {
         if (!this.params) {
             return;
         }
@@ -117,7 +121,7 @@ export class NFProcess {
      * @param key       key
      * @param value     值
      */
-    setVariablesParam(key: string, value: any) {
+    async setVariablesParam(key: string, value: any) {
         if (key) {
             this.params[key] = value;
         } else {
@@ -125,7 +129,7 @@ export class NFProcess {
         }
         //更改参数保存到流程实例中
         this.instance.variables = JSON.stringify(this.params);
-        this.instance.save();
+        await this.instance.save();
     }
 
     /**
@@ -178,11 +182,38 @@ export class NFProcess {
         this.currentNode = node;
         //设置当前变量
         if (node instanceof NTaskNode) {
-            //更换流程实例当前节点名
-            this.instance.currentId = node.id;
+            let currentTask = new NFTask(node);
+            //任务节点加入当前任务节点map
+            this.currentNodeMap.set(currentTask.getNodeId(), currentTask);
             await this.instance.save();
+            //
             if (node.nfNode && node.nfNode.variables) {
                 this.params = JSON.stringify(node.nfNode.variables);
+            }
+        }
+    }
+
+    /**
+     * 用于恢复流程实例所有当前的任务节点
+     */
+    async setMapCurrentNodes() {
+        let nodeId = this.getId();
+        let nfNodes: NfNode[] = await this.getAllNodes(nodeId);
+        let nodeArr: NfNode[] = [];
+        //查找所有未完成的任务
+        for (let n of nfNodes) {
+            if (!n.endTime) {
+                nodeArr.push(n);
+            }
+        }
+        //将所有节点放入currentNodeMap中
+        for (let node of nodeArr) {
+            let nodeInstance = this.getNode(node.defId);
+            if (nodeInstance instanceof NTaskNode) {
+                //此时节点实例需要加入节点实体
+                nodeInstance.nfNode = node;
+                let currentTask = new NFTask(nodeInstance);
+                this.currentNodeMap.set(currentTask.getNodeId(), currentTask);
             }
         }
     }
@@ -192,18 +223,16 @@ export class NFProcess {
      * @param cfg       配置
      * @returns 
      */
-    async next(cfg?: object) {
+    async next(nodeId: number, cfg?: object) {
         //当前任务id
         let nid;
-        if (this.currentNode) {
-            nid = this.currentNode.id;
-            if (this.currentNode instanceof NTaskNode) {
-                await this.currentNode.finish(cfg);
-            }
-        } else {
-            const node = <NTaskNode>this.getNode(this.instance.currentId);
+        //任务实例
+        let node: NFTask = this.currentNodeMap.get(nodeId);
+        if (node) {
+            nid = node.getDefId();
             await node.finish(cfg);
-            nid = this.instance.currentId;
+        } else {
+            throw ("当前流程实例无该任务!");
         }
         //执行下个流程节点
         let seq = this.getSequenceNode(nid);
@@ -256,7 +285,10 @@ export class NFProcess {
     async createChildProcess() {
 
     }
-
+    /**
+     * 获取当前流程实例实体的流程id
+     * @returns 
+     */
     public getId(): number {
         return this.instance.processId;
     }

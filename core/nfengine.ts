@@ -1,4 +1,6 @@
+import { EntityManager, getEntityManager, RelaenManager } from "relaen";
 import { NfDefProcess } from "./entity/nfdefprocess";
+import { NfNode } from "./entity/nfnode";
 import { NfProcess } from "./entity/nfprocess";
 import { NFDeployProcess } from "./nfdeplyprocess";
 import { NFProcess } from "./nfprocess";
@@ -120,14 +122,16 @@ export class NFEngine {
         if (this.processMap.has(procId)) {
             return this.processMap.get(procId);
         }
-        //从数据库获取
+        //从数据库获取 
         const proc = <NfProcess>await NfProcess.find(procId);
         if (!proc) {
             return null;
         }
         const defProc: NfDefProcess = await proc.getNfDefProcess();
         let cfg = this.parseCfgStr(defProc.cfgStr);
-        const process = new NFProcess(cfg);
+        const process = new NFProcess(cfg, proc);
+        //将当前实例对应的任务实例加入Map
+        await process.setMapCurrentNodes()
         //保存流程实例
         process.instance = proc;
         this.processMap.set(procId, process);
