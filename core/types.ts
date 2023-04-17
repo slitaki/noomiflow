@@ -10,10 +10,22 @@ export enum ENodeType {
     PARALLEL = 'parallel',      //并行网关 
     INCLUSIVE = 'inclusive',    //包容网关
     USERTASK = 'usertask',      //用户任务
-    MODULETASK = 'moduletask'  //模块任务
-
+    MODULETASK = 'moduletask', //模块任务
+    SCRIPTTASK = 'scriptTask', //函数任务
+    TASK = 'task'               //普通任务
 }
 
+export const GatewayType = ["exclusiveGateway", "inclusiveGateway", "parallelGateway"]
+export const TaskType = ["userTask", "task", "scriptTask"]
+/**网关映射信息 */
+export enum NfType {
+    exclusiveGateway = ENodeType.EXCLUSIVE,
+    inclusiveGateway = ENodeType.INCLUSIVE,
+    parallelGateway = ENodeType.PARALLEL,
+    userTask = ENodeType.USERTASK,
+    scriptTask = ENodeType.SCRIPTTASK,
+    task = ENodeType.TASK
+}
 export interface INode {
     /**
      * 节点id，全流程唯一
@@ -48,4 +60,56 @@ export interface INode {
      * 目标节点，对sequence有效
      */
     dst?: string;
+
 }
+export class NFlowNode {
+    /**
+     * 节点id，全流程唯一
+     */
+    id: string;
+    /**
+     * 节点名，全流程唯一(用于显示)
+     */
+    name: string;
+
+    /**
+     * 类型
+     */
+    type: ENodeType;
+
+    /**
+     * 条件，对sequence有效
+     */
+    cond?: string;
+
+    /**
+     * 页面路径，对人工任务有效
+     */
+    pagePath?: string;
+
+    /**
+     * 函数块  用于script task任务
+     */
+    script?: string;
+
+    /**
+     *  函数路径 用于script task 任务
+     */
+    path?: string
+
+    /**
+     * 任务候选人
+     */
+    candidateUsers?: string
+    /**
+     * 来源节点，对sequence有效
+     */
+    src?: string;
+
+    /**
+     * 目标节点，对sequence有效
+     */
+    dst?: string;
+
+}
+
