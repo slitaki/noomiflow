@@ -37,8 +37,8 @@ export class NTaskNode extends NNode {
                 node.reason = cfg.reason;
                 node.userId = cfg.userId;
             }
-            // node.variables= this.process.getParam
             node.nfProcess = this.process.instance;
+            node.variables = JSON.stringify(await this.process.getParam())
             await node.save();
         }
         await em.close();

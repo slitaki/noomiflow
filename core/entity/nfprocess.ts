@@ -113,14 +113,34 @@ export class NfProcess extends BaseEntity {
 		type: 'int',
 		nullable: true
 	})
-	public userId: number;
+	public userId: string;
+
+	@Column({
+		name: 'INST_NUMBER',
+		type: 'int',
+		nullable: true
+	})
+	public instNumber: number;
+
+	@Column({
+		name: 'COMINST_NUMBER',
+		type: 'int',
+		nullable: true
+	})
+	public cominstNumber: number;
+
+	@Column({
+		name: 'ACTINST_NUMBER',
+		type: 'int',
+		nullable: true
+	})
+	public actinstNumber: number;
 
 	@OneToMany({
 		entity: 'NfNode',
 		mappedBy: 'nfProcess'
 	})
 	public nfNodes: Array<NfNode>;
-
 
 	constructor(idValue?: number) {
 		super();
@@ -132,5 +152,4 @@ export class NfProcess extends BaseEntity {
 	public async getNfNodes(): Promise<Array<NfNode>> {
 		return this['nfNodes'] ? this['nfNodes'] : await EntityProxy.get(this, 'nfNodes');
 	}
-
 }

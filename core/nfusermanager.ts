@@ -83,7 +83,7 @@ export class NFUserManager {
      * 获取用户(通过组名)
      * @param groupNames 
      */
-    static async getUserIdsByUserNames(userNames: string): Promise<NfUser[]> {
+    static async getUserIdsByUserNames(userNames: string): Promise<number[]> {
         //得到组名数组
         const arr = userNames.split(',');
         const em: EntityManager = await getEntityManager();
@@ -161,5 +161,26 @@ export class NFUserManager {
         const total = await em.getCount(NfProcess.name, param);
         await em.close();
         return { total: total, rows: nodes }
+    }
+
+    /**
+     * 获取当前组任务
+     * @param groupName 组名
+     */
+    public static async getGroupTask(groupName: string) {
+        let group: NfGroup = <NfGroup>await NfGroup.findOne({
+            name: {
+                value: groupName,
+                rel: '='
+            }
+        })
+        if (!group) {
+            throw Error("不存在该组")
+        }
+        let groupId: number = group.groupId;
+        let em: EntityManager = await getEntityManager();
+        let sql: string = "SELECT * from nf_node where CANDIDATE_GROUPS = \"," + groupId + ",\"and END_TIME is null;"
+        let tasksList: NfNode[] = await em.createNativeQuery(sql, NfNode.name).getResultList();
+        return tasksList;
     }
 }

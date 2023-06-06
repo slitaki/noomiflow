@@ -1,6 +1,5 @@
-import { EntityManager, getEntityManager, RelaenManager } from "relaen";
+import { EntityManager, Query, getEntityManager } from "relaen";
 import { NfDefProcess } from "./entity/nfdefprocess";
-import { NfNode } from "./entity/nfnode";
 import { NfProcess } from "./entity/nfprocess";
 import { NFDeployProcess } from "./nfdeplyprocess";
 import { NFProcess } from "./nfprocess";
@@ -16,9 +15,9 @@ export class NFEngine {
     /**
      * 定义流程
      * @param name      流程名
-     * @param cfgStr    流程定义串 
+     * @param cfg    流程定义串 
      */
-    private static async saveDefineProcess(cfg): Promise<NfDefProcess> {
+    private static async saveDefineProcess(cfg: any): Promise<NfDefProcess> {
         const defP: NfDefProcess = new NfDefProcess();
         defP.defName = cfg.name;
         defP.createTime = new Date().getTime();
@@ -27,16 +26,15 @@ export class NFEngine {
         console.log("deploy succecessful");
         return <NfDefProcess>await defP.save();
     }
+
     /**
      * 部署流程
-     * @param src  流程文件路径
-     * todo
+     * @param classPath 相对路径
      */
-    public static async defineProcess(src: string): Promise<NFDeployProcess> {
-        const path = require('path').resolve(src);
-        const str = require('fs').readFileSync(path);
-        //读取json文件
-        const procCfg = JSON.parse(str);
+    public static async defineProcess(classpath: string): Promise<NFDeployProcess> {
+        const path = require('path').resolve(classpath);
+        const cfgStr = require('fs').readFileSync(path);
+        const procCfg = JSON.parse(cfgStr);
         //验证流程模型
         const isCorrct = this.varifyFlow(procCfg);
         if (isCorrct) {
@@ -56,6 +54,7 @@ export class NFEngine {
     private static varifyFlow(procCfg: any) {
         return true;
     }
+
     /**
      * 创建流程实例
      * @param IdOrName 流程模型 id | name
@@ -94,10 +93,14 @@ export class NFEngine {
         const process = new NFProcess(cfg);
         //保存流程实例 
         //userId用于第一个任务节点的Assginee
-        process.instance = await this.saveInstance(defP, instName, userId);
+        if (userId) {
+            var creator = userId.toString();
+        }
+        process.instance = await this.saveProcess(defP, instName, creator);
         //返回流程对象
         return process;
     }
+
     /**
      * 关闭流程
      * @param processId     流程id
@@ -115,7 +118,9 @@ export class NFEngine {
     }
 
     /**
-     * 根据流程实例id获取流程实例
+     * 根据流程id获取流程
+     * @param procId 流程id
+     * @returns 
      */
     static async getInstanceById(procId: number): Promise<NFProcess> {
         //从缓存获取
@@ -131,26 +136,40 @@ export class NFEngine {
         let cfg = this.parseCfgStr(defProc.cfgStr);
         const process = new NFProcess(cfg, proc);
         //将当前实例对应的任务实例加入Map
-        await process.setMapCurrentNodes()
+        await process.recoverMap()
         //保存流程实例
         process.instance = proc;
         this.processMap.set(procId, process);
         return process;
     }
-    /**
-     * 根据流程名获取流程实例
-     */
-    //todo
-    static async getInstanceByName() {
 
+    /**
+     * 根据流程名获取已经开始且未结束的流程
+     * @param procName 
+     * @param pageNo 
+     * @param pageSize 
+     */
+    static async getInstanceByName(procName: string, pageNo?: number, pageSize?: number) {
+        let param = { processName: procName, endTime: null };
+        const em: EntityManager = await getEntityManager();
+        const query: Query = em.createQuery(NfProcess.name);
+        let start = 0;
+        if (pageNo > 0 && pageSize > 0) {
+            start = (pageNo - 1) * pageSize;
+        }
+        const process: NfProcess[] = <NfProcess[]>await query.select(['*']).where(param).getResultList(start, pageSize);
+        const total = await em.getCount(NfProcess.name, param);
+        await em.close();
+        return { total: total, rows: process }
     }
+
     /**
      * 保存流程实例：流程流转时,新建和修改时需要保存当前流程的状况
      * @param defProc   流程定义
      * @param name      流程实例名
-     * @param userId    用户id
+     * @param userId    用户id //会签任务可能是多个任务
      */
-    public static async saveInstance(defProc: NfDefProcess, name: string, userId: number): Promise<NfProcess> {
+    public static async saveProcess(defProc: NfDefProcess, name: string, userId?: string): Promise<NfProcess> {
         let proc: NfProcess = new NfProcess();
         proc.createTime = new Date().getTime();
         proc.userId = userId;
@@ -162,6 +181,7 @@ export class NFEngine {
         proc = <NfProcess>await proc.save();
         return proc;
     }
+
     /**
      * 查询已部署的流程
      * @param defId //流程部署id
@@ -174,10 +194,15 @@ export class NFEngine {
         return nFDeployProc;
     }
 
-    public static async findDefProcBykeyWord(keyWord?: string): Promise<NfDefProcess[]> {
+    /**
+     * 通过关键字查询
+     * @param keyWords 
+     * @returns 
+     */
+    public static async findDefProcBykeyWord(keyWords?: string): Promise<NfDefProcess[]> {
         //流程名 
-        if (keyWord) {
-            let defineProcess = <NfDefProcess[]>await NfDefProcess.findMany({ "keywords": keyWord });
+        if (keyWords) {
+            let defineProcess = <NfDefProcess[]>await NfDefProcess.findMany({ "keywords": keyWords });
             return defineProcess;
         }//查所有
         else {
@@ -187,7 +212,7 @@ export class NFEngine {
     }
 
     /**
-     * 暂停流程定义
+     * 暂停定义的流程
      * @param defId
      * @returns 
      */
@@ -203,7 +228,7 @@ export class NFEngine {
     }
 
     /**
-     * 激活流程
+     * 唤醒定义的流程
      * @param defId
      * @returns 
      */

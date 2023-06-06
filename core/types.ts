@@ -1,3 +1,4 @@
+import { NfNode } from "./entity/nfnode";
 
 /**
  * 节点类型
@@ -112,4 +113,7 @@ export class NFlowNode {
     dst?: string;
 
 }
-
+export interface userTask {
+    total: number,
+    rows: NfNode[]
+}

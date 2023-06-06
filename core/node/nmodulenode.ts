@@ -33,7 +33,7 @@ export class NModuleNode extends NTaskNode {
         try {
             const parser = await import(this.modulePath);
             await parser(this.process);
-            await this.process.next(this.nfNode.nodeId);
+            await this.process.next(this.nfNode.defId);
         } catch (e) {
             console.error(e);
         }

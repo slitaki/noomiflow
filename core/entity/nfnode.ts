@@ -59,16 +59,17 @@ export class NfNode extends BaseEntity{
 
 	@Column({
 		name:'ASSIGNEE',
-		type:'int',
-		nullable:true
+		type:'string',
+		nullable:true,
+		length:128
 	})
-	public assignee:number;
+	public assignee:string;
 
 	@Column({
 		name:'CANDIDATE_USERS',
 		type:'string',
 		nullable:true,
-		length:2048
+		length:128
 	})
 	public candidateUsers:string;
 
@@ -76,7 +77,7 @@ export class NfNode extends BaseEntity{
 		name:'CANDIDATE_GROUPS',
 		type:'string',
 		nullable:true,
-		length:2048
+		length:128
 	})
 	public candidateGroups:string;
 
@@ -96,13 +97,6 @@ export class NfNode extends BaseEntity{
 	public variables:string;
 
 	@Column({
-		name:'USER_ID',
-		type:'int',
-		nullable:true
-	})
-	public userId:number;
-
-	@Column({
 		name:'IS_AGREE',
 		type:'int',
 		nullable:true
@@ -116,6 +110,20 @@ export class NfNode extends BaseEntity{
 		length:1024
 	})
 	public reason:string;
+
+	@Column({
+		name:'USER_ID',
+		type:'int',
+		nullable:true
+	})
+	public userId:number;
+
+	@Column({
+		name:'OWNER',
+		type:'int',
+		nullable:true
+	})
+	public owner:number;
 
 	@OneToMany({
 		entity:'NfResource',
