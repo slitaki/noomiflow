@@ -2,7 +2,7 @@ import { NEndNode } from "./node/nendnode";
 import { NNode } from "./node/nnode";
 import { NSequenceNode } from "./node/nsequencenode";
 import { NStartNode } from "./node/nstartnode";
-import { ENodeType, INode } from "./types";
+import { ENodeType, INode, deLinkList } from "./types";
 import { NExclusiveNode } from "./node/nexclusivenode";
 import { NInclusiveNode } from "./node/ninclusivenode";
 import { NParallelNode } from "./node/nparallelnode";
@@ -12,6 +12,9 @@ import { NTaskNode } from "./node/ntasknode";
 import { NfNode } from "./entity/nfnode";
 import { NModuleNode } from "./node/nmodulenode";
 import { NFTask } from "./nftask";
+import { time } from "console";
+import { Ntask } from "../dist/types/core/ntask";
+import { promises } from "dns";
 /**
  * 流程类
  */
@@ -24,7 +27,7 @@ export class NFProcess {
     /**
      * 当前任务节点 并行网关等 流程会有多个任务节点
      */
-    private currentNodeMap: Map<string, NFTask> = new Map();
+    private currentNodeMap: Map<number, NFTask> = new Map();
     /**
 0     * 流程参数
      */
@@ -37,6 +40,10 @@ export class NFProcess {
      * 当前用户id
      */
     public userId: number;
+    /**
+     * 双向链表
+     */
+    private linkList: any = {}
 
     constructor(cfg, inst?: NfProcess) {
         this.handleNodes(cfg);
@@ -55,27 +62,34 @@ export class NFProcess {
             switch (n.type) {
                 case ENodeType.START:
                     node = new NStartNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.START);
                     break;
                 case ENodeType.END:
                     node = new NEndNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.USERTASK);
                     break;
                 case ENodeType.SEQUENCE:
                     node = new NSequenceNode(n, this);
                     break;
                 case ENodeType.USERTASK:
                     node = new NUserTaskNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.USERTASK);
                     break;
                 case ENodeType.MODULETASK:
                     node = new NModuleNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.MODULETASK);
                     break;
                 case ENodeType.EXCLUSIVE:
                     node = new NExclusiveNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.EXCLUSIVE);
                     break;
                 case ENodeType.INCLUSIVE:
                     node = new NInclusiveNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.INCLUSIVE);
                     break;
                 case ENodeType.PARALLEL:
                     node = new NParallelNode(n, this);
+                    this.linkList[n.id] = new deLinkList(n.id, ENodeType.PARALLEL);
                     break;
             }
             rNodes.push(node);
@@ -83,12 +97,19 @@ export class NFProcess {
         this.nodes = rNodes;
         //执行节点初始化
         this.doNodeInit();
+        //执行链表初始化
+        for (let n of nodes) {
+            if (n.type == ENodeType.SEQUENCE) {
+                this.linkList[n.src].next = this.linkList[n.dst]
+                this.linkList[n.dst].front = this.linkList[n.src];
+            }
+        }
     }
 
     /**
-     * 对有init方法的节点执行init
+     * 对有init方法的节点执行init  todo在恢复实例时 是否执行init 方法
      */
-    doNodeInit() {
+    private doNodeInit() {
         for (let node of this.nodes) {
             if (node['init']) {
                 node['init'].apply(node);
@@ -177,7 +198,7 @@ export class NFProcess {
         if (node instanceof NTaskNode) {
             let currentTask = new NFTask(node);
             //任务节点加入当前任务节点map
-            this.currentNodeMap.set(currentTask.getDefId(), currentTask);
+            this.currentNodeMap.set(currentTask.getNodeId(), currentTask);
             //修改实体当前任务节点
             this.instance.currentId = this.getMapkeys();
             await this.instance.save();
@@ -207,7 +228,7 @@ export class NFProcess {
                 //此时节点实例需要加入节点实体
                 nodeInstance.nfNode = node;
                 let currentTask = new NFTask(nodeInstance);
-                this.currentNodeMap.set(currentTask.getDefId(), currentTask);
+                this.currentNodeMap.set(currentTask.getNodeId(), currentTask);
             }
         }
     }
@@ -217,7 +238,7 @@ export class NFProcess {
      * @param id  节点id
      * @param cfg 
      */
-    async next(id: string, cfg?: object) {
+    async next(id: number, cfg?: object): Promise<void> {
         //任务节点
         let node: NFTask = this.currentNodeMap.get(id);
         if (node) {
@@ -268,7 +289,7 @@ export class NFProcess {
      * @param procId    流程id
      * @returns         节点集合
      */
-    async getAllNodes(procId: number) {
+    async getAllNodes(procId: number): Promise<NfNode[]> {
         //从数据库获取
         const nodes: NfNode[] = <NfNode[]>await NfNode.findMany({ nfProcess: procId });
         //获取资源
@@ -290,6 +311,69 @@ export class NFProcess {
         return this.instance.processId;
     }
 
+    /**
+     * 动态路由节点跳转
+     * @param curNodeId  //原节点id
+     * @param aimNode  //跳转的任务节点名
+     */
+    public async jumpTo(curNodeId: number, aimDefId: string): Promise<boolean> {
+        if (!this.currentNodeMap.has(curNodeId)) { //当前节点不存在
+            return false;
+        }
+        let curNode: NFTask = this.currentNodeMap.get(curNodeId);
+        let targetNode: NNode = this.nodes.find(item => {
+            item.id === aimDefId
+        })
+        if (!targetNode) return false; //目标节点不存在
+        let count = this.currentNodeMap.size; //当前节点个数
+        if (count == 0) {
+            return false;
+        }
+        if (count > 1) { //当前存在多个任务节点
+            //未跳转到路由之前,则只处理当前节点即可
+            if (!this.isBeforGateway(curNode.getDefId(), aimDefId)) {
+                await curNode.stopTask();
+                this.currentNodeMap.delete(curNodeId);
+                //存入
+            } else { //当前任务所有节点都需要回退
+                let cnMapKeys = this.currentNodeMap.keys();
+                for (let k of cnMapKeys) {
+                    let task = this.currentNodeMap.get(k);
+                    await task.stopTask()
+                }
+            }
+
+        } else { //只存在一个节点
+            await curNode.stopTask();
+            this.currentNodeMap.delete(curNodeId);
+            if (targetNode instanceof NTaskNode) {
+                this.setCurrentNode(targetNode);
+            }
+            return true;
+        }
+        if (targetNode instanceof NTaskNode) {
+            this.setCurrentNode(targetNode);
+        }
+        return true;
+    }
+
+    /**
+     * 判断跳转节点是否在包容网关或并行网关之前
+     * @param curid 
+     * @param aimId 
+     * @returns 
+     */
+    private isBeforGateway(curid: string, aimId: string): boolean {
+        let frontNode = this.linkList[curid].front;
+        while (frontNode.type != ENodeType.START) {
+            if (frontNode.id == aimId) { break; }
+            else if (frontNode.type == ENodeType.INCLUSIVE || frontNode.type == ENodeType.PARALLEL) {
+                return true;
+            }
+            frontNode = frontNode.front;
+        }
+        return false;
+    }
     /**
      * 返回当前任务节点
      * @returns 
