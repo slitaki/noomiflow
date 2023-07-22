@@ -51,7 +51,6 @@ export class NFResolver {
         let sqFlows = this.handleSquence(process.sequenceFlow);
         nodes.nodes = nodes.nodes.concat(sqFlows);
         this.fs.writeFileSync('./' + nodes.name + ".json", JSON.stringify(nodes))
-
     }
 
     /**

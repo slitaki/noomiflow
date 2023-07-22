@@ -27,11 +27,19 @@ export class NParallelNode extends NNode {
     }
 
     async run() {
-        // await super.run();
-        //执行一次，则计数器-1，到0时，表示网关可以进行下一步 
-        if (--this.inCount === 0) {
-            for (let node of this.outSequences) {
-                await node.run();
+        let param = await this.process.getIncomParams(this.id);
+        if (!param) { //不存在则初始化
+            await this.process.setIncomParams(this.id, this.inCount);
+        } else {
+            param--;//执行一次，则计数器-1，到0时，表示网关可以进行下一步 
+            if (param === 0) {
+                for (let node of this.outSequences) {
+                    await node.run();
+                }
+                await this.process.deleteIncomParams(this.id);
+            } else {
+                this.process.instance.incomParams[this.id] = param;
+                await this.process.instance.save();
             }
         }
     }

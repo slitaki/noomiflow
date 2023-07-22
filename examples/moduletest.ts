@@ -6,29 +6,28 @@ import { RelaenConfig } from "./relaenconfig";
 /**
  * 定义流程
  */
-async function defineProcess(){
+async function deployProcess() {
     const path = require('path').resolve('./examples/flows/flow2.json');
     const str = require('fs').readFileSync(path);
-    const json = JSON.parse(str);
-    await NFEngine.defineProcess(json);
+    await NFEngine.deployProcess(str);
 }
 
 
 /**
  * 测试
  */
-(async function(){
+(async function () {
     RelaenManager.init(RelaenConfig);
-    // await defineProcess();
+    await deployProcess();
     // await (await NFEngine.createProcess('模块流程','模块流程2-管理员提交-20221020',1)).start();
-    
+
     //用户流程设置参数
     const nodes = await NFUserManager.getUnHandleNodes(1);
-    const proc = await NFEngine.getInstance(nodes.rows[0].nfProcess.processId,1);
-    proc.setParam('arr',[1,2,3,4,5]);
-    await proc.next();
-    console.log(proc.getParam());
-    
+    // const proc = await NFEngine.getInstance(nodes.rows[0].nfProcess.processId, 1);
+    // proc.setParam('arr',[1,2,3,4,5]);
+    // await proc.next();
+    // console.log(proc.getParam());
+
     // const nodes = await NFEngine.getUnHandleNodes(2);
     // const proc = await NFEngine.getInstance(nodes.rows[0].nfProcess.processId,2);
     // proc.setParam('agree',1);

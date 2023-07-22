@@ -36,7 +36,7 @@ export class NSequenceNode extends NNode {
         //并行网关，不执行条件
         if (node instanceof NParallelNode) {
             await node.run();
-        } else if (!this.expr || this.expr.val(this.process.getParam())) {
+        } else if (!this.expr || this.expr.val(await this.process.getParam(this.src))) {
             await node.run();
         } else {
             return false;

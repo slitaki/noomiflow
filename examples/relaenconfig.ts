@@ -3,19 +3,13 @@ export const RelaenConfig = {
     "host": "localhost",
     "port": 3306,
     "username": "root",
-    "password": "field",
-    "database": "nooflow",
+    "password": "990906",
+    "database": "workflow",
     "entities": [
         "/dist/core/entity/**/*.js"
     ],
     "cache": true,
     "debug": true,
-    "fileLog": false,
-    "fullTableOperation": true,
-    "pool": {
-        "min": 1,
-        "max": 10
-    },
-    "connectTimeout": 10000,
-    "idleTimeout": 10000
+    "fileLog": true,
+    "connectTimeout": 2147483647
 }

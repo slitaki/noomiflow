@@ -1,37 +1,17 @@
 import { EntityManager, Query, getEntityManager } from "relaen";
 import { NfDefProcess } from "./entity/nfdefprocess";
 import { NfProcess } from "./entity/nfprocess";
-import { NFDeployProcess } from "./nfdeplyprocess";
+import { NFDeployProcess } from "./nfdeployprocess";
 import { NFProcess } from "./nfprocess";
 /**
  * 流程引擎
  */
 export class NFEngine {
     /**
-     * 流程map
-     */
-    static processMap: Map<number, NFProcess> = new Map();
-
-    /**
-     * 定义流程
-     * @param name      流程名
-     * @param cfg    流程定义串 
-     */
-    private static async saveDefineProcess(cfg: any): Promise<NfDefProcess> {
-        const defP: NfDefProcess = new NfDefProcess();
-        defP.defName = cfg.name;
-        defP.createTime = new Date().getTime();
-        defP.dueTime = cfg.dueTime;
-        defP.cfgStr = JSON.stringify(cfg.nodes);
-        console.log("deploy succecessful");
-        return <NfDefProcess>await defP.save();
-    }
-
-    /**
      * 部署流程
      * @param classPath 相对路径
      */
-    public static async defineProcess(classpath: string): Promise<NFDeployProcess> {
+    public static async deployProcess(classpath: string): Promise<NFDeployProcess> {
         const path = require('path').resolve(classpath);
         const cfgStr = require('fs').readFileSync(path);
         const procCfg = JSON.parse(cfgStr);
@@ -39,7 +19,7 @@ export class NFEngine {
         const isCorrct = this.varifyFlow(procCfg);
         if (isCorrct) {
             //存储流程模型
-            let defProc: NfDefProcess = await this.saveDefineProcess(procCfg);
+            let defProc: NfDefProcess = await NFDeployProcess.saveDefineProcess(procCfg);
             let defProcIns = new NFDeployProcess(defProc);
             return defProcIns;
         } else {
@@ -52,6 +32,9 @@ export class NFEngine {
      * todo
      */
     private static varifyFlow(procCfg: any) {
+        if (!procCfg.name) {
+            return false;
+        }
         return true;
     }
 
@@ -89,8 +72,7 @@ export class NFEngine {
         if (defP.isSuspend === 1) {
             throw ("该流程定义已挂起");
         }
-        let cfg = this.parseCfgStr(defP.cfgStr);
-        const process = new NFProcess(cfg);
+        const process = new NFProcess(defP.cfgStr);
         //保存流程实例 
         //userId用于第一个任务节点的Assginee
         if (userId) {
@@ -123,23 +105,20 @@ export class NFEngine {
      * @returns 
      */
     static async getInstanceById(procId: number): Promise<NFProcess> {
-        //从缓存获取
-        if (this.processMap.has(procId)) {
-            return this.processMap.get(procId);
-        }
         //从数据库获取 
         const proc = <NfProcess>await NfProcess.find(procId);
         if (!proc) {
             return null;
         }
+        //流程已结束
+        if (proc.endTime) {
+            return null;
+        }
         const defProc: NfDefProcess = await proc.getNfDefProcess();
-        let cfg = this.parseCfgStr(defProc.cfgStr);
-        const process = new NFProcess(cfg, proc);
-        //将当前实例对应的任务实例加入Map
-        await process.recoverMap()
-        //保存流程实例
+        const process = new NFProcess(defProc.cfgStr, proc);
+        //恢复未完成节点
+        await process.reCurNodeMap()
         process.instance = proc;
-        this.processMap.set(procId, process);
         return process;
     }
 
@@ -150,7 +129,7 @@ export class NFEngine {
      * @param pageSize 
      */
     static async getInstanceByName(procName: string, pageNo?: number, pageSize?: number) {
-        let param = { processName: procName, endTime: null };
+        let param = { processName: procName, endTime: null };//todo 优化 不使用null
         const em: EntityManager = await getEntityManager();
         const query: Query = em.createQuery(NfProcess.name);
         let start = 0;
@@ -244,18 +223,5 @@ export class NFEngine {
         }
     }
 
-    /**
-     * 解析流程字符串
-     * @param cfgStr 
-     * @returns 
-     */
-    private static parseCfgStr(cfgStr: string) {
-        let cfg;
-        try {
-            cfg = JSON.parse(cfgStr);
-            return cfg;
-        } catch (e) {
-            throw "流程定义错误!";
-        }
-    }
+
 }

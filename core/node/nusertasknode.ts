@@ -2,6 +2,7 @@ import { EntityManager, getEntityManager, Query } from "relaen";
 import { NfNode } from "../entity/nfnode";
 import { NFUserManager } from "../nfusermanager";
 import { NTaskNode } from "./ntasknode";
+import { ENodeType } from "../types";
 /**
  * 人工任务
  */
@@ -24,19 +25,19 @@ export class NUserTaskNode extends NTaskNode {
             .orderBy({ nodeId: "desc" })
             .getResult();
         //回滚则使用之前参数，否则使用现有变量
-        const variables = node ? node.variables : JSON.stringify(this.process.getParam());
+        // const variables = node ? node.variables : JSON.stringify(this.process.getParam(this.id));
         node = new NfNode();
         node.nfProcess = this.process.instance;
         node.startTime = new Date().getTime();
         node.defId = this.id;
         node.nodeName = this.name;
+        node.nodeType = ENodeType.USERTASK;
         //设置指派人
         //默认为流程创始人
         if (this.process.instance.userId) {
             node.assignee = this.process.instance.userId
         }
         let arr;
-
         //
         if (this['candidateUsers']) {
             arr = await NFUserManager.getUserIdsByUserNames(this['candidateUsers']);
@@ -46,7 +47,7 @@ export class NUserTaskNode extends NTaskNode {
             arr = [node.assignee];
         }
         node.candidateUsers = ',' + arr.join(',') + ',';
-        node.variables = variables;
+        // node.variables = variables;
         await node.save();
         await em.close();
         return node;

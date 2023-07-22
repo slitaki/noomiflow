@@ -50,7 +50,7 @@ export interface INode {
     /**
      * 页面路径，对人工任务有效
      */
-    pagePath?: string;
+    pagePath?: string
 
     /**
      * 来源节点，对sequence有效
@@ -120,8 +120,8 @@ export interface userTask {
 
 //双向链表
 export class deLinkList {
-    public last: deLinkList; //前一个节点
-    public front: deLinkList; //后一个节点
+    public last: deLinkList[] = []; //前一个节点
+    public front: deLinkList[] = []; //后一个节点
     public id: string; //节点id 唯一
     public type: string; //节点类型 
     constructor(id: string, type: string) {

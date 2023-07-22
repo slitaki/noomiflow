@@ -1,0 +1,118 @@
+{
+    "name": "合同审核流程",
+    "nodes": [
+        {
+            "type": "start",
+            "id": "start"
+        },
+        {
+            "type": "sequence",
+            "src": "start",
+            "dst": "task1"
+        },
+        {
+            "type": "usertask",
+            "id": "task1",
+            "name": "起草合同"
+        },
+        {
+            "type": "sequence",
+            "src": "task1",
+            "dst": "exgate1"
+        },
+        {
+            "type": "inclusive",
+            "id": "exgate1"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate1",
+            "dst": "task2",
+            "cond": "money>5000"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate1",
+            "dst": "task3",
+            "cond": "money>5000"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate1",
+            "dst": "task4",
+            "cond": "money>1000"
+        },
+        {
+            "type": "usertask",
+            "id": "task2",
+            "name": "律师1"
+        },
+        {
+            "type": "usertask",
+            "id": "task3",
+            "name": "律师2"
+        },
+        {
+            "type": "usertask",
+            "id": "task4",
+            "name": "律师代表团"
+        },
+        {
+            "type": "sequence",
+            "src": "task2",
+            "dst": "exgate2"
+        },
+        {
+            "type": "sequence",
+            "src": "task3",
+            "dst": "exgate2"
+        },
+        {
+            "type": "inclusive",
+            "id": "exgate2"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate2",
+            "dst": "task5"
+        },
+        {
+            "type": "usertask",
+            "id": "task5",
+            "name": "法律顾问"
+        },
+        {
+            "type": "inclusive",
+            "id": "exgate3"
+        },
+        {
+            "type": "sequence",
+            "src": "task5",
+            "dst": "exgate3"
+        },
+        {
+            "type": "sequence",
+            "src": "task4",
+            "dst": "exgate3"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate3",
+            "dst": "task6"
+        },
+        {
+            "type": "usertask",
+            "id": "task6",
+            "name": "签订合同"
+        },
+        {
+            "type": "sequence",
+            "src": "task6",
+            "dst": "end"
+        },
+        {
+            "type": "end",
+            "id": "end"
+        }
+    ]
+}

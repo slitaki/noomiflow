@@ -1,155 +1,164 @@
-import { BaseEntity, Entity, Column, Id, JoinColumn, ManyToOne, OneToMany, EntityProxy } from 'relaen';
-import { NfDefProcess } from './nfdefprocess';
-import { NfNode } from './nfnode';
+import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,OneToMany,EntityProxy} from 'relaen';
+import {NfDefProcess} from './nfdefprocess';
+import {NfNode} from './nfnode';
 
 @Entity('nf_process')
-export class NfProcess extends BaseEntity {
+export class NfProcess extends BaseEntity{
 	@Id()
 	@Column({
-		name: 'PROCESS_ID',
-		type: 'int',
-		nullable: false
+		name:'PROCESS_ID',
+		type:'int',
+		nullable:false
 	})
-	public processId: number;
+	public processId:number;
 
-	@ManyToOne({ entity: 'NfDefProcess' })
+	@ManyToOne({entity:'NfDefProcess'})
 	@JoinColumn({
-		name: 'PROCESS_DEF_ID',
-		refName: 'PROCESS_DEF_ID',
-		nullable: true
+		name:'PROCESS_DEF_ID',
+		refName:'PROCESS_DEF_ID',
+		nullable:true
 	})
-	public nfDefProcess: NfDefProcess;
+	public nfDefProcess:NfDefProcess;
 
 	@Column({
-		name: 'PROCESS_NAME',
-		type: 'string',
-		nullable: true,
-		length: 64
+		name:'PROCESS_NAME',
+		type:'string',
+		nullable:true,
+		length:64
 	})
-	public processName: string;
+	public processName:string;
 
 	@Column({
-		name: 'START_TIME',
-		type: 'int',
-		nullable: true
+		name:'START_TIME',
+		type:'int',
+		nullable:true
 	})
-	public startTime: number;
+	public startTime:number;
 
 	@Column({
-		name: 'END_TIME',
-		type: 'int',
-		nullable: true
+		name:'END_TIME',
+		type:'int',
+		nullable:true
 	})
-	public endTime: number;
+	public endTime:number;
 
 	@Column({
-		name: 'HANDLE_TIME',
-		type: 'int',
-		nullable: true
+		name:'HANDLE_TIME',
+		type:'int',
+		nullable:true
 	})
-	public handleTime: number;
+	public handleTime:number;
 
 	@Column({
-		name: 'CREATE_TIME',
-		type: 'int',
-		nullable: true
+		name:'CREATE_TIME',
+		type:'int',
+		nullable:true
 	})
-	public createTime: number;
+	public createTime:number;
 
 	@Column({
-		name: 'CURRENT_ID',
-		type: 'string',
-		nullable: true,
-		length: 255
+		name:'CURRENT_ID',
+		type:'string',
+		nullable:true,
+		length:256
 	})
-	public currentId: string;
+	public currentId:string;
 
 	@Column({
-		name: 'DELETE_TIME',
-		type: 'int',
-		nullable: true
+		name:'DELETE_TIME',
+		type:'int',
+		nullable:true
 	})
-	public deleteTime: number;
+	public deleteTime:number;
 
 	@Column({
-		name: 'DELETE_REASON',
-		type: 'string',
-		nullable: true,
-		length: 2048
+		name:'DELETE_REASON',
+		type:'string',
+		nullable:true,
+		length:2048
 	})
-	public deleteReason: string;
+	public deleteReason:string;
 
 	@Column({
-		name: 'DUE_TIME',
-		type: 'int',
-		nullable: true
+		name:'DUE_TIME',
+		type:'int',
+		nullable:true
 	})
-	public dueTime: number;
+	public dueTime:number;
 
 	@Column({
-		name: 'VARIABLES',
-		type: 'string',
-		nullable: true,
-		length: 4000
+		name:'VARIABLES',
+		type:'string',
+		nullable:true,
+		length:2048
 	})
-	public variables: string;
+	public variables:string;
 
 	@Column({
-		name: 'VER',
-		type: 'int',
-		nullable: true
+		name:'VER',
+		type:'int',
+		nullable:true
 	})
-	public ver: number;
+	public ver:number;
 
 	@Column({
-		name: 'IS_ACTIVE',
-		type: 'int',
-		nullable: true
+		name:'IS_ACTIVE',
+		type:'int',
+		nullable:true
 	})
-	public isActive: number;
+	public isActive:number;
 
 	@Column({
-		name: 'USER_ID',
-		type: 'int',
-		nullable: true
+		name:'USER_ID',
+		type:'string',
+		nullable:true,
+		length:64
 	})
-	public userId: string;
+	public userId:string;
 
 	@Column({
-		name: 'INST_NUMBER',
-		type: 'int',
-		nullable: true
+		name:'INST_NUMBER',
+		type:'int',
+		nullable:true
 	})
-	public instNumber: number;
+	public instNumber:number;
 
 	@Column({
-		name: 'COMINST_NUMBER',
-		type: 'int',
-		nullable: true
+		name:'COMINST_NUMBER',
+		type:'int',
+		nullable:true
 	})
-	public cominstNumber: number;
+	public cominstNumber:number;
 
 	@Column({
-		name: 'ACTINST_NUMBER',
-		type: 'int',
-		nullable: true
+		name:'ACTINST_NUMBER',
+		type:'int',
+		nullable:true
 	})
-	public actinstNumber: number;
+	public actinstNumber:number;
+
+	@Column({
+		name:'INCOM_PARAMS',
+		type:'string',
+		nullable:true,
+		length:255
+	})
+	public incomParams:string;
 
 	@OneToMany({
-		entity: 'NfNode',
-		mappedBy: 'nfProcess'
+		entity:'NfNode',
+		mappedBy:'nfProcess'
 	})
-	public nfNodes: Array<NfNode>;
+	public nfNodes:Array<NfNode>;
 
-	constructor(idValue?: number) {
+	constructor(idValue?:number){
 		super();
 		this.processId = idValue;
 	}
-	public async getNfDefProcess(): Promise<NfDefProcess> {
-		return this['nfDefProcess'] ? this['nfDefProcess'] : await EntityProxy.get(this, 'nfDefProcess');
+	public async getNfDefProcess():Promise<NfDefProcess>{
+		return this['nfDefProcess']?this['nfDefProcess']:await EntityProxy.get(this,'nfDefProcess');
 	}
-	public async getNfNodes(): Promise<Array<NfNode>> {
-		return this['nfNodes'] ? this['nfNodes'] : await EntityProxy.get(this, 'nfNodes');
+	public async getNfNodes():Promise<Array<NfNode>>{
+		return this['nfNodes']?this['nfNodes']:await EntityProxy.get(this,'nfNodes');
 	}
 }

@@ -1,5 +1,5 @@
 import { NNode } from "./nnode";
-import { INode } from "../types";
+import { INode, deLinkList } from "../types";
 import { NSequenceNode } from "./nsequencenode";
 import { NFProcess } from "../nfprocess";
 
@@ -14,19 +14,24 @@ export class NInclusiveNode extends NNode {
      */
     sequences: NSequenceNode[];
 
-    /**
-     * 执行剩余数量
-     */
-    inCount: number;
-
     constructor(cfg: INode, process: NFProcess) {
         super(cfg, process);
     }
 
     async run() {
-        // await super.run();
-        //执行一次，则计数器-1，到0时，表示网关可以进行下一步 
-        if (--this.inCount === 0) {
+        let tasks = this.process.getTaskArr();
+        //网关等待状态默认true ，false 表示网关可以进行下一步
+        let isWating = true;
+        if (tasks.length != 0) { //当前流程存在待执行任务节点
+            for (let t of tasks) {
+                if (this.isChildNode(t.getDefId(), this.id)) {
+                    isWating = !isWating;
+                    break;
+                }
+            }
+        }
+
+        if (!isWating || tasks.length == 0) { //网关激活，执行到下一步
             for (let node of this.outSequences) {
                 await node.run();
             }
@@ -39,6 +44,32 @@ export class NInclusiveNode extends NNode {
         if (!this.outSequences || this.outSequences.length === 0 || !this.inSequences || this.inSequences.length === 0) {
             throw `节点'${this.name}'配置错误!`;
         }
-        this.inCount = this.inSequences.length;
+    }
+
+    /**
+     * 判断包容网管是否是任务节点的子节点
+     */
+    private isChildNode(taskDefId: string, exgateDefId: string) {
+        if (Object.keys(this.process.linkGraph).length == 0) {
+            this.process.buildLinkGraph();
+        }
+        let linkGraph = this.process.linkGraph;
+        //层序遍历
+        let listArr: deLinkList[] = [];
+        let vistedMap: Map<string, boolean> = new Map();
+        listArr.concat(linkGraph[taskDefId].last);
+        while (listArr.length != 0) {
+            let node: deLinkList = listArr.shift();
+            if (!vistedMap.get(node.id)) {
+                if (node.id == exgateDefId) { //是子节点
+                    return true;
+                }
+                if (!vistedMap.get(node.id)) {//未遍历过该节点
+                    listArr = listArr.concat(node.last);
+                    vistedMap.set(node.id, true);
+                }
+            }
+        }
+        return false;
     }
 }

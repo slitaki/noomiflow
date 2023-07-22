@@ -19,11 +19,13 @@ export class NExclusiveNode extends NNode {
     async run() {
         // await super.run();
         //第一个满足则结束
+        //todo默认跳线
         for (let node of this.outSequences) {
             if (await node.run()) {
                 break;
             }
         }
+        throw ("没有满足条件的顺序流用于后续执行！")
     }
 
     init() {

@@ -16,7 +16,7 @@ export class NfNode extends BaseEntity{
 	@JoinColumn({
 		name:'PROCESS_ID',
 		refName:'PROCESS_ID',
-		nullable:true
+		nullable:false
 	})
 	public nfProcess:NfProcess;
 
@@ -124,6 +124,21 @@ export class NfNode extends BaseEntity{
 		nullable:true
 	})
 	public owner:number;
+
+	@Column({
+		name:'PRIORITY',
+		type:'int',
+		nullable:true
+	})
+	public priority:number;
+
+	@Column({
+		name:'NODE_TYPE',
+		type:'string',
+		nullable:true,
+		length:32
+	})
+	public nodeType:string;
 
 	@OneToMany({
 		entity:'NfResource',
