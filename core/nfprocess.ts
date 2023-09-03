@@ -2,7 +2,7 @@ import { NEndNode } from "./node/nendnode";
 import { NNode } from "./node/nnode";
 import { NSequenceNode } from "./node/nsequencenode";
 import { NStartNode } from "./node/nstartnode";
-import { ENodeType, INode, deLinkList } from "./types";
+import { ENodeType, INode, deLinkList, eventListenType } from "./types";
 import { NExclusiveNode } from "./node/nexclusivenode";
 import { NInclusiveNode } from "./node/ninclusivenode";
 import { NParallelNode } from "./node/nparallelnode";
@@ -12,7 +12,10 @@ import { NTaskNode } from "./node/ntasknode";
 import { NfNode } from "./entity/nfnode";
 import { NModuleNode } from "./node/nmodulenode";
 import { NFTask } from "./nftask";
-import { SrvRecord } from "dns";
+import { NFTaskListener } from "./nftasklistener";
+import { EntityManager, getEntityManager } from "relaen";
+import { json } from "stream/consumers";
+
 
 /**
  * 流程类
@@ -22,13 +25,12 @@ export class NFProcess {
      * 流程节点集合
      */
     public nodes: NNode[] = [];
-
     /**
      * 当前任务节点 并行网关等 流程会有多个任务节点
      */
     private currentNodeMap: Map<string, NFTask> = new Map();
     /**
-0     * 流程参数
+     * 流程参数
      */
     private params: any = {};
     /**
@@ -43,13 +45,20 @@ export class NFProcess {
      * 流程定义字符串
      */
     private cfgStr: string;
-
-    //
+    /**
+     * 
+     */
     private procNodeDefId: string;
+
+    public taskListenerSet = new Set();
 
     constructor(cfg, inst?: NfProcess) {
         this.cfgStr = cfg;
-        this.instance = inst;
+        if (inst) {
+            this.instance = inst;
+            this.params = JSON.parse(inst.variables)
+        }
+
     }
 
     /**
@@ -177,7 +186,7 @@ export class NFProcess {
     }
 
     /**
-     * 获取节点
+     * 获取定义节点
      * @param id    节点id 
      * @returns     节点
      */
@@ -190,9 +199,8 @@ export class NFProcess {
      * @param node 
      */
     public async setCurrentNode(node: NNode) {
-        //设置当前变量
         if (node instanceof NTaskNode) {
-            let currentTask = new NFTask(node);
+            let currentTask = new NFTask(node, this);
             //任务节点加入当前任务节点map
             this.currentNodeMap.set(currentTask.getDefId(), currentTask);
             //修改实体当前任务节点
@@ -216,7 +224,7 @@ export class NFProcess {
             if (NNode instanceof NTaskNode) {
                 //此时节点实例需要加入节点实体
                 NNode.nfNode = node;
-                let currentTask = new NFTask(NNode);
+                let currentTask = new NFTask(NNode, this);
                 this.currentNodeMap.set(currentTask.getDefId(), currentTask);
             }
         }
@@ -243,7 +251,7 @@ export class NFProcess {
      * @param cfg 
      */
     public async next(defId: string, cfg?: object): Promise<void> {
-        this.procNodeDefId = defId;
+        // this.procNodeDefId = defId;
         //任务节点
         let node: NFTask = this.currentNodeMap.get(defId);
         if (node) {
@@ -263,7 +271,6 @@ export class NFProcess {
         }
         this.instance.currentId = this.getMapkeys();
         await this.instance.save();
-        this.params = null;
     }
 
     /**
@@ -458,25 +465,46 @@ export class NFProcess {
         return taskArr;
     }
     /**
+     * 设置流程变量
+     * @param key '
+     * @param value 
+     */
+    public async setParam(key: string, value: any) {
+        if (key) {
+            this.params[key] = value;
+        }
+        this.instance.variables = JSON.stringify(this.params);
+        await this.instance.save();
+    }
+    /**
      * 获取任务的流程变量
-     * @param gateDefIdefId 
+     * @param gateDefId
      * @returns 
      */
-    public async getParam(gateDefId: string) {
-        let task = <NfNode>await NfNode.findOne({
-            defId: this.procNodeDefId,
-            "nfProcess.processId": this.getId()
-        });
-        return task ? JSON.parse(task.variables) : null;
+    public async getParam() {
+        let em: EntityManager = await getEntityManager();
+        let query = em.createQuery(NfProcess.name);
+        let procInst: NfProcess = await query.select(["*", "nfDefProcess"]).where({
+            processId: this.getId()
+        }).getResult()
+        await em.close();
+        this.instance = procInst;
+        this.params = JSON.parse(this.instance.variables);
+        return this.params;
     }
-
     /**
      * 获取网关的汇总顺序流个数
      * @param defId 
      * @returns 
      */
     public async getIncomParams(defId: string) {
-        let proc: NfProcess = <NfProcess>await NfProcess.find(this.instance.processId);
+        let em: EntityManager = await getEntityManager();
+        let query = em.createQuery(NfProcess.name);
+        let proc: NfProcess = await query.select(["*", "nfDefProcess"]).where({
+            processId: this.getId()
+        }).getResult()
+        await em.close();
+        proc.nfDefProcess = await proc.getNfDefProcess();
         this.instance = proc;
         let paral = proc.incomParams;
         if (paral) {
@@ -532,4 +560,22 @@ export class NFProcess {
             throw "流程定义错误!";
         }
     }
+
+    /**
+     * 执行任务监听器 
+     * @param node 
+     */
+    public async doGlobalListner(node: NNode, type: string) {
+        let listener;
+        switch (type) {
+            case eventListenType.START: listener = NFTaskListener.getStartListenerMap(node.listener); break;
+            case eventListenType.END: listener = NFTaskListener.getEndListenerMap(node.listener); break;
+            case eventListenType.TAKE: listener = NFTaskListener.getTakeListenerMap(node.listener); break;
+        }
+        const func = listener.prototype["notify"];
+        await func.apply(listener.prototype.notify)
+    }
+
+
+
 }

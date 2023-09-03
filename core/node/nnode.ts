@@ -1,5 +1,6 @@
+import { createGunzip } from "zlib";
 import { NFProcess } from "../nfprocess";
-import { ENodeType, INode } from "../types";
+import { ENodeType, INode, eventListenType } from "../types";
 
 /**
  * 基础节点
@@ -25,10 +26,19 @@ export class NNode {
      */
     type: string;
 
+    /**
+     * 监听器类名
+     */
+    listener?: string;
+
     constructor(cfg: INode, process: NFProcess) {
         this.name = cfg.name;
         this.id = cfg.id;
         this.process = process;
+        if (cfg.listener) {
+            this.listener = cfg.listener;
+        }
+
     }
 
     /**

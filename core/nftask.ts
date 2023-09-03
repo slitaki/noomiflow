@@ -1,4 +1,6 @@
 import { NfNode } from "./entity/nfnode";
+import { NfProcess } from "./entity/nfprocess";
+import { NFProcess } from "./nfprocess";
 import { NTaskNode } from "./node/ntasknode";
 
 /**
@@ -9,13 +11,12 @@ export class NFTask {
     public taskNode: NTaskNode;
     //任务Entity //todo
     public nfNode: NfNode;
-    //流程变量
-    public params: any = {};
-
-    constructor(taskNode: NTaskNode) {
+    //流程
+    private process: NFProcess
+    constructor(taskNode: NTaskNode, process: NFProcess) {
         this.taskNode = taskNode;
         this.nfNode = taskNode.nfNode;
-        // this.defId = taskNode.nfNode.defId;
+        this.process = process
     }
     /**
      * 查询 任务节点
@@ -44,7 +45,6 @@ export class NFTask {
         await node.save();
         return this;
     }
-
     /**
      * 是否已有人处理任务
      * @returns
@@ -57,7 +57,10 @@ export class NFTask {
             return false;
         }
     }
-
+    /**
+     * 获取任务处理人
+     * @returns 
+     */
     async getAssigneeId() {
         return this.taskNode.nfNode.assignee;
     }
@@ -67,14 +70,7 @@ export class NFTask {
     * @param value     值
     */
     async setVariables(key: string, value: any) {
-        if (key) {
-            this.params[key] = value;
-        } else {
-            this.params = value;
-        }
-        //更改参数保存到流程实例中
-        this.nfNode.variables = JSON.stringify(this.params);
-        await this.nfNode.save();
+        await this.process.setParam(key, value);
     }
     /**
      * 节点实体nodeId
@@ -98,6 +94,20 @@ export class NFTask {
         return this.taskNode.name;
     }
     /**
+     * 获取开始时间
+     * @returns 
+     */
+    getStartTime(): number {
+        return this.nfNode.startTime;
+    }
+    /**
+     * 获取当前任务流程Id
+     * @returns 
+     */
+    getProcessInstId(): number {
+        return this.process.getId();
+    }
+    /**
      * 结束任务
      * @param cfg 
      */
@@ -110,16 +120,7 @@ export class NFTask {
     async stopTask() {
         let nfnode = this.taskNode.nfNode;
         nfnode.endTime = new Date().getTime();
-        //todo 数据库终止字段
+        //todo 终止的任务删除
         await nfnode.save();
-    }
-    getParams(key?: string) {
-        if (!this.params) {
-            return; //判断 todo
-        }
-        if (key) {
-            return this.params[key];
-        }
-        return this.params;
     }
 }

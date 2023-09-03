@@ -25,7 +25,6 @@ export class NExclusiveNode extends NNode {
                 break;
             }
         }
-        throw ("没有满足条件的顺序流用于后续执行！")
     }
 
     init() {

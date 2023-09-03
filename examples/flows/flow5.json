@@ -1,0 +1,74 @@
+{
+    "name": "流程监听测试",
+    "nodes": [
+        {
+            "type": "start",
+            "id": "start",
+            "listener": "MyListener"
+        },
+        {
+            "type": "sequence",
+            "src": "start",
+            "dst": "task1"
+        },
+        {
+            "type": "usertask",
+            "id": "task1",
+            "name": "提交审核"
+        },
+        {
+            "type": "sequence",
+            "src": "task1",
+            "dst": "exgate1"
+        },
+        {
+            "type": "exclusive",
+            "id": "exgate1"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate1",
+            "dst": "end",
+            "cond": "data==1"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate1",
+            "dst": "task2",
+            "cond": "data==2",
+            "listener": "TakeListener"
+        },
+        {
+            "type": "usertask",
+            "id": "task2",
+            "name": "审核",
+            "candidateUsers": "yang"
+        },
+        {
+            "type": "sequence",
+            "src": "task2",
+            "dst": "exgate2"
+        },
+        {
+            "type": "exclusive",
+            "id": "exgate2"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate2",
+            "dst": "task1",
+            "cond": "agree==0"
+        },
+        {
+            "type": "sequence",
+            "src": "exgate2",
+            "dst": "end",
+            "cond": "agree==1"
+        },
+        {
+            "type": "end",
+            "id": "end",
+            "listener": "EndListener"
+        }
+    ]
+}

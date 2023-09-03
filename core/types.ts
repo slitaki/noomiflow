@@ -62,6 +62,11 @@ export interface INode {
      */
     dst?: string;
 
+    /**
+     * 监听器
+     */
+    listener?: string
+
 }
 export class NFlowNode {
     /**
@@ -112,6 +117,10 @@ export class NFlowNode {
      */
     dst?: string;
 
+    /**
+    * 监听器，对task有效
+    */
+    listener?: string
 }
 export interface userTask {
     total: number,
@@ -128,4 +137,15 @@ export class deLinkList {
         this.id = id;
         this.type = type;
     }
+
+}
+
+// 全局监听任务类型
+export enum eventListenType {
+    START = "start",
+    END = "end",
+    TAKE = "take",
+    CREATE = "create",
+    ASSIGNMENT = "assignment",
+    DELETE = "delete"
 }

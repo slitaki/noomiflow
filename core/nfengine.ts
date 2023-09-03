@@ -1,14 +1,15 @@
-import { EntityManager, Query, getEntityManager } from "relaen";
+import { EntityManager, Query, RelaenManager, getEntityManager } from "relaen";
 import { NfDefProcess } from "./entity/nfdefprocess";
 import { NfProcess } from "./entity/nfprocess";
 import { NFDeployProcess } from "./nfdeployprocess";
 import { NFProcess } from "./nfprocess";
+import { NFTaskListener } from "./nftasklistener";
 /**
  * 流程引擎
  */
 export class NFEngine {
     /**
-     * 部署流程
+     * 部署流程模型
      * @param classPath 相对路径
      */
     public static async deployProcess(classpath: string): Promise<NFDeployProcess> {
@@ -16,7 +17,7 @@ export class NFEngine {
         const cfgStr = require('fs').readFileSync(path);
         const procCfg = JSON.parse(cfgStr);
         //验证流程模型
-        const isCorrct = this.varifyFlow(procCfg);
+        const isCorrct = this.varifyProcMdl(procCfg);
         if (isCorrct) {
             //存储流程模型
             let defProc: NfDefProcess = await NFDeployProcess.saveDefineProcess(procCfg);
@@ -31,7 +32,7 @@ export class NFEngine {
      * 检验流程模型
      * todo
      */
-    private static varifyFlow(procCfg: any) {
+    private static varifyProcMdl(procCfg: any) {
         if (!procCfg.name) {
             return false;
         }
@@ -101,12 +102,12 @@ export class NFEngine {
 
     /**
      * 根据流程id获取流程
-     * @param procId 流程id
+     * @param processId 流程id
      * @returns 
      */
-    static async getInstanceById(procId: number): Promise<NFProcess> {
+    static async getInstanceById(processId: number): Promise<NFProcess> {
         //从数据库获取 
-        const proc = <NfProcess>await NfProcess.find(procId);
+        const proc = <NfProcess>await NfProcess.find(processId);
         if (!proc) {
             return null;
         }
@@ -224,4 +225,16 @@ export class NFEngine {
     }
 
 
+    /**
+     * 获取连接 、获取监视器 配合nommi 使用AOP
+     * @before注解中使用
+     * @param nfConfig
+     */
+    public static async init() {
+        const path = require('path').resolve("./nfconfig.json");
+        const str = require('fs').readFileSync(path);
+        const json = JSON.parse(str);
+        RelaenManager.init(json.RelaenConfig);
+        await NFTaskListener.initListenerMap(json.NFlowConfig);
+    }
 }

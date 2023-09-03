@@ -1,0 +1,26 @@
+{
+    "RelaenConfig": {
+        "dialect": "mysql",
+        "host": "localhost",
+        "port": 3306,
+        "username": "root",
+        "password": "990906",
+        "database": "workflow",
+        "entities": [
+            "/dist/core/entity/**/*.js"
+        ],
+        "cache": true,
+        "debug": true,
+        "fileLog": false,
+        "connectTimeout": 100000,
+        "fullTableOperation": false,
+        "pool": {
+            "min": 1,
+            "max": 10
+        },
+        "idleTimeout": 10000
+    },
+    "NFlowConfig": {
+        "listenerPath": "./dist/test/listener"
+    }
+}

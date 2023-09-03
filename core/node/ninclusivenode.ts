@@ -30,7 +30,6 @@ export class NInclusiveNode extends NNode {
                 }
             }
         }
-
         if (!isWating || tasks.length == 0) { //网关激活，执行到下一步
             for (let node of this.outSequences) {
                 await node.run();

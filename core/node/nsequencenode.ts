@@ -1,5 +1,7 @@
+import { log } from "console";
 import { NExpression } from "../expression";
 import { NFProcess } from "../nfprocess";
+import { eventListenType } from "../types";
 import { NNode } from "./nnode";
 import { NParallelNode } from "./nparallelnode";
 
@@ -35,8 +37,14 @@ export class NSequenceNode extends NNode {
         }
         //并行网关，不执行条件
         if (node instanceof NParallelNode) {
+            if (this.listener) {
+                await this.process.doGlobalListner(this, eventListenType.TAKE);
+            }
             await node.run();
-        } else if (!this.expr || this.expr.val(await this.process.getParam(this.src))) {
+        } else if (!this.expr || this.expr.val(await this.process.getParam())) {
+            if (this.listener) {
+                await this.process.doGlobalListner(this, eventListenType.TAKE);
+            }
             await node.run();
         } else {
             return false;
