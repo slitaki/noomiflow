@@ -73,13 +73,13 @@ export class NFEngine {
         if (defP.isSuspend === 1) {
             throw ("该流程定义已挂起");
         }
-        const process = new NFProcess(defP.cfgStr);
         //保存流程实例 
         //userId用于第一个任务节点的Assginee
         if (userId) {
             var creator = userId.toString();
         }
-        process.instance = await this.saveProcess(defP, instName, creator);
+        let proc = await this.saveProcess(defP, instName, creator);
+        const process = new NFProcess(defP.cfgStr, proc);
         //返回流程对象
         return process;
     }
@@ -119,7 +119,6 @@ export class NFEngine {
         const process = new NFProcess(defProc.cfgStr, proc);
         //恢复未完成节点
         await process.reCurNodeMap()
-        process.instance = proc;
         return process;
     }
 

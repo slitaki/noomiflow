@@ -14,8 +14,7 @@ import { NModuleNode } from "./node/nmodulenode";
 import { NFTask } from "./nftask";
 import { NFTaskListener } from "./nftasklistener";
 import { EntityManager, getEntityManager } from "relaen";
-import { json } from "stream/consumers";
-
+import { NfHiProcInst } from "./entity/nfhiprocinst";
 
 /**
  * 流程类
@@ -24,7 +23,7 @@ export class NFProcess {
     /**
      * 流程节点集合
      */
-    public nodes: NNode[] = [];
+    private nodes: NNode[] = [];
     /**
      * 当前任务节点 并行网关等 流程会有多个任务节点
      */
@@ -36,7 +35,7 @@ export class NFProcess {
     /**
      * 流程实体
      */
-    public instance: NfProcess;
+    private instance: NfProcess;
     /**
      * 节点链接图
      */
@@ -45,10 +44,6 @@ export class NFProcess {
      * 流程定义字符串
      */
     private cfgStr: string;
-    /**
-     * 
-     */
-    private procNodeDefId: string;
 
     public taskListenerSet = new Set();
 
@@ -134,12 +129,10 @@ export class NFProcess {
      * @param key       key
      * @param value     值
      */
-    setStartVariablesParam(key: string, value: any) {
-        if (key) {
-            this.params[key] = value;
-        } else {
-            this.params = value;
-        }
+    setStartParam(key: string, value: any) {
+        let param = {};
+        param[key] = value;
+        Object.assign(this.params, param);
     }
 
     /**
@@ -166,7 +159,6 @@ export class NFProcess {
         //参数保存到流程实例中
         this.instance.variables = JSON.stringify(this.params);
         await this.instance.save();
-
     }
 
     /**
@@ -183,8 +175,21 @@ export class NFProcess {
         this.instance.endTime = new Date().getTime();
         this.instance.handleTime = this.instance.endTime - this.instance.startTime;
         await this.instance.save();
+        await this.saveHisProc();
     }
 
+    /**
+     * 保存历史流程
+     */
+    public async saveHisProc() {
+        let hisProc: NfHiProcInst = new NfHiProcInst();
+        hisProc.processId = this.getId();
+        hisProc.procDefId = this.getDefId();
+        hisProc.startTime = this.getStartTime();
+        hisProc.endTime = this.instance.endTime;
+        hisProc.duration = this.instance.handleTime;
+        await hisProc.save();
+    }
     /**
      * 获取定义节点
      * @param id    节点id 
@@ -207,7 +212,8 @@ export class NFProcess {
             this.instance.currentId = this.getMapkeys();
             await this.instance.save();
             if (node.nfNode && node.nfNode.variables) {
-                this.params = JSON.stringify(node.nfNode.variables);
+                let param = JSON.stringify(node.nfNode.variables);
+                Object.assign(this.params, param);
             }
         }
     }
@@ -323,7 +329,12 @@ export class NFProcess {
     public getId(): number {
         return this.instance.processId;
     }
-
+    public getStartTime() {
+        return this.instance.startTime;
+    }
+    public getDefId(): number {
+        return this.instance.nfDefProcess.processDefId;
+    }
     /**
      * 动态路由节点跳转
      * @param curNodeId  //原节点id
@@ -473,6 +484,7 @@ export class NFProcess {
         if (key) {
             this.params[key] = value;
         }
+
         this.instance.variables = JSON.stringify(this.params);
         await this.instance.save();
     }
@@ -481,7 +493,7 @@ export class NFProcess {
      * @param gateDefId
      * @returns 
      */
-    public async getParam() {
+    public async getParam(redo?: boolean) {
         let em: EntityManager = await getEntityManager();
         let query = em.createQuery(NfProcess.name);
         let procInst: NfProcess = await query.select(["*", "nfDefProcess"]).where({
