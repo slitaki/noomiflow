@@ -1,4 +1,4 @@
-import { error } from "console";
+import { error, log } from "console";
 import { ENodeType, GatewayType, NFlowNode, NfType, TaskType } from "./types";
 
 //XML解析器
@@ -24,33 +24,34 @@ export class NFResolver {
         let xmlObject: any = await this.getXmlObject(xmlreader, flowContent);
         let process = xmlObject.process;
         //初始化节点信息
-        let nodes = { name: "", nodes: [] }
+        let flow = { name: "", nodes: [] }
         //name属性
-        nodes.name = process.attributes().name;
+        flow.name = process.attributes().name;
         //处理开始节点
         let startNode = this.getStartEvent(process.startEvent);
-        nodes.nodes.push(startNode);
+        flow.nodes.push(startNode);
         //处理结束节点
         let endNode = this.getEndEvent(process.endEvent);
-        nodes.nodes = nodes.nodes.concat(endNode);
+        flow.nodes = flow.nodes.concat(endNode);
         //处理任务节点  目前支持三种任务节点
         for (let taskTp of TaskType) {
             if (taskTp in process) {
                 let task = this.handleTaskNode(process[taskTp], NfType[taskTp]);
-                nodes.nodes = nodes.nodes.concat(task);
+                flow.nodes = flow.nodes.concat(task);
             }
         }
         //处理网关系节点
         for (let GatewayTp of GatewayType) {
             if (GatewayTp in process) {
                 let gateNodes = this.handleGateway(process[GatewayTp], NfType[GatewayTp]);
-                nodes.nodes = nodes.nodes.concat(gateNodes);
+                flow.nodes = flow.nodes.concat(gateNodes);
             }
         }
         //处理顺序流节点
         let sqFlows = this.handleSquence(process.sequenceFlow);
-        nodes.nodes = nodes.nodes.concat(sqFlows);
-        this.fs.writeFileSync('./' + nodes.name + ".json", JSON.stringify(nodes))
+        flow.nodes = flow.nodes.concat(sqFlows);
+        this.fs.writeFileSync('./' + flow.name + ".json", JSON.stringify(flow))
+        return flow;
     }
 
     /**

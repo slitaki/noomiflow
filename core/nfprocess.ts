@@ -35,7 +35,7 @@ export class NFProcess {
     /**
      * 流程实体
      */
-    private instance: NfProcess;
+    public instance: NfProcess;
     /**
      * 节点链接图
      */
@@ -51,7 +51,10 @@ export class NFProcess {
         this.cfgStr = cfg;
         if (inst) {
             this.instance = inst;
-            this.params = JSON.parse(inst.variables)
+            if (inst.variables) {
+                this.params = JSON.parse(inst.variables)
+            }
+
         }
 
     }

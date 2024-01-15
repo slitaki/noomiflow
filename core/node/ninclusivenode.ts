@@ -62,7 +62,7 @@ export class NInclusiveNode extends NNode {
             if (!vistedMap.get(node.id)) {
                 if (node.id == exgateDefId) { //是子节点
                     return true;
-                }
+                } 0
                 if (!vistedMap.get(node.id)) {//未遍历过该节点
                     listArr = listArr.concat(node.last);
                     vistedMap.set(node.id, true);

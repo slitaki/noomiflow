@@ -179,8 +179,14 @@ export class NFUserManager {
         }
         let groupId: number = group.groupId;
         let em: EntityManager = await getEntityManager();
-        let sql: string = "SELECT * from nf_node where CANDIDATE_GROUPS = \"," + groupId + ",\"and END_TIME is null;"
-        let tasksList: NfNode[] = await em.createNativeQuery(sql, NfNode.name).getResultList();
+        //查询所有的组任务
+        let tasksList: NfNode[] = await em.findMany(NfNode.name, {
+            candidateGroups: {
+                value: "," + groupId + ",",
+                rel: "="
+            }
+        })
+        await em.close()
         return tasksList;
     }
 }

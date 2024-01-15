@@ -4,6 +4,8 @@ import { NfProcess } from "./entity/nfprocess";
 import { NFDeployProcess } from "./nfdeployprocess";
 import { NFProcess } from "./nfprocess";
 import { NFTaskListener } from "./nftasklistener";
+import { Tools } from "./tools";
+import { ENodeType } from "./types";
 /**
  * 流程引擎
  */
@@ -33,9 +35,9 @@ export class NFEngine {
      * todo
      */
     private static varifyProcMdl(procCfg: any) {
-        if (!procCfg.name) {
-            return false;
-        }
+        let nodes = Tools.parseCfgStr(procCfg);
+
+
         return true;
     }
 
@@ -235,5 +237,14 @@ export class NFEngine {
         const json = JSON.parse(str);
         RelaenManager.init(json.RelaenConfig);
         await NFTaskListener.initListenerMap(json.NFlowConfig);
+    }
+    private parseCfgStr(cfgStr: string) {
+        let cfg;
+        try {
+            cfg = JSON.parse(cfgStr);
+            return cfg;
+        } catch (e) {
+            throw "流程定义错误!";
+        }
     }
 }

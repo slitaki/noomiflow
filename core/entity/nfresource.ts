@@ -1,51 +1,71 @@
-import {BaseEntity,Entity,Column,Id,JoinColumn,ManyToOne,EntityProxy} from 'relaen';
-import {NfNode} from './nfnode';
+import { BaseEntity, Entity, Column, Id, JoinColumn, ManyToOne, EntityProxy } from 'relaen';
+import { NfNode } from './nfnode';
 
 @Entity('nf_resource')
-export class NfResource extends BaseEntity{
+export class NfResource extends BaseEntity {
 	@Id()
 	@Column({
-		name:'RESOURCE_ID',
-		type:'int',
-		nullable:false
+		name: 'RESOURCE_ID',
+		type: 'int',
+		nullable: false
 	})
-	public resourceId:number;
-
-	@ManyToOne({entity:'NfNode'})
-	@JoinColumn({
-		name:'NODE_INST_ID',
-		refName:'NODE_ID',
-		nullable:true
-	})
-	public nfNode:NfNode;
+	public resourceId: number;
 
 	@Column({
-		name:'RESOURCE_NAME',
-		type:'string',
-		nullable:true,
-		length:256
+		name: 'RESOURCE_NAME',
+		type: 'string',
+		nullable: true,
+		length: 256
 	})
-	public resourceName:string;
+	public resourceName: string;
 
 	@Column({
-		name:'RESOURCE_BYTE',
-		type:'string',
-		nullable:true
+		name: 'RESOURCE_BYTE',
+		type: 'string',
+		nullable: true
 	})
-	public resourceByte:string;
+	public resourceByte: string;
 
 	@Column({
-		name:'VER',
-		type:'int',
-		nullable:true
+		name: 'VER',
+		type: 'int',
+		nullable: true
 	})
-	public ver:number;
+	public ver: number;
 
-	constructor(idValue?:number){
+	@Column({
+		name: 'FILE_PATH',
+		type: 'string',
+		nullable: true,
+		length: 255
+	})
+	public filePath: string;
+
+	@Column({
+		name: 'DOWN_PATH',
+		type: 'string',
+		nullable: true,
+		length: 255
+	})
+	public downPath: string;
+
+	@Column({
+		name: 'TYPE',
+		type: 'string',
+		nullable: true,
+		length: 255
+	})
+	public type: string;
+
+	@Column({
+		name: 'CREATE_TIME',
+		type: 'int',
+		nullable: true
+	})
+	public createTime: number;
+
+	constructor(idValue?: number) {
 		super();
 		this.resourceId = idValue;
-	}
-	public async getNfNode():Promise<NfNode>{
-		return this['nfNode']?this['nfNode']:await EntityProxy.get(this,'nfNode');
 	}
 }
